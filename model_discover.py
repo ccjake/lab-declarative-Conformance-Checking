@@ -4,7 +4,17 @@ import os
 # log = xes_importer(os.path.join("test","input_data",""))
 
 def declare_model_discover(path):
+    """
+
+    @param path: the path of the log, that would be mined
+    @return: return the model
+    """
+    # variant = xes_importer.Variants.ITERPARSE
+    # parameters = {variant.value.Parameters.TIMESTAMP_SORT: True}
     log = xes_importer.apply(path)
+    # print(log[0][0])
+    # print()
+    # print(type(log))
     skolen = lsk_discovery.apply(log= log)
     return skolen
 
