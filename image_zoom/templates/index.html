@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <title>
+    Zoom-in and zoom-out image
+    </title>
+{% endblock %}
+
+{% block body %}
+    <h3>
+    Image zoom in and zoom out
+    </h3>
+
+    <hr>
+    <div class="box">
+        <img 
+        src="https://rulemining.org/wp-content/themes/rum-theme/images/pickaxe.png" 
+        id="test"
+        GFG="250" alt="rulemining">
+    </div>
+    <hr>
+
+    <button type="button" onclick="zoomin()">
+        Zoom-In
+    </button>
+    <button type="button" onclick="zoomout()">
+        Zoom-Out
+    </button>
+
+    <script type="text/javascript">
+        function zoomin() {
+            var GFG = document.getElementById("test");
+            var currWidth = GFG.clientWidth;
+            GFG.style.width = (currWidth + 100) + "px";
+        }
+        function zoomout() {
+            var GFG = document.getElementById("test");
+            var currWidth = GFG.clientWidth;
+            GFG.style.width = (currWidth - 100) + "px";
+        }
+    </script>
+{% endblock %}
