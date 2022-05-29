@@ -4,22 +4,19 @@
     <title>
     Zoom-in and zoom-out image
     </title>
+    <style>
+        #imgContainer {
+            background: rgba(255, 0, 0, 0.1);
+        }
+    </style>
+
 {% endblock %}
 
 {% block body %}
-    <h3>
+     <h3>
     Image zoom in and zoom out
     </h3>
-
-    <hr>
-    <div class="box">
-        <img 
-        src="https://rulemining.org/wp-content/themes/rum-theme/images/pickaxe.png" 
-        id="test"
-        GFG="250" alt="rulemining">
-    </div>
-    <hr>
-
+<!-- test 1 -->
     <button type="button" onclick="zoomin()">
         Zoom-In
     </button>
@@ -31,12 +28,43 @@
         function zoomin() {
             var GFG = document.getElementById("test");
             var currWidth = GFG.clientWidth;
-            GFG.style.width = (currWidth + 100) + "px";
+            GFG.style.width = (currWidth + 10) + "px";
         }
         function zoomout() {
             var GFG = document.getElementById("test");
             var currWidth = GFG.clientWidth;
-            GFG.style.width = (currWidth - 100) + "px";
+            GFG.style.width = (currWidth - 10) + "px";
         }
     </script>
+
+<!-- test 2 -->
+    <hr>
+        <div class="image-zoom-result">
+            <img 
+            src="https://rulemining.org/wp-content/themes/rum-theme/images/pickaxe.png" 
+            id="test"
+            GFG="250" 
+            alt="rulemining">
+        </div>
+    <hr> 
+
+
+     <div class="container">
+        <div id="imgContainer">
+            <img id="img" src="https://rulemining.org/wp-content/themes/rum-theme/images/pickaxe.png" alt="rulemining2">
+        </div>
+    </div>
+    <script>
+        window.onload = function () {
+            const img = document.getElementById("img");
+            const imgContainer = document.getElementById("imgContainer");
+            var rate = 5000;
+            const calc = (value) => 1 + value / 5000;
+            imgContainer.addEventListener("mousewheel", function (e) {
+                img.style.width = img.offsetWidth * calc(e.deltaY) + 'px'
+                e.preventDefault()
+            }, false);
+        }
+    </script>
+
 {% endblock %}
