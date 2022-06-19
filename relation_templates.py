@@ -22,6 +22,8 @@ def responded_existence(table: str, activities):
     queries.add(case_id_query(table))
     for A in activities:
         for B in activities:
+            if A == B:
+                continue
             col_name = "Responded_Existence " + A + " TO " + B
             query = "1 - MATCH_ACTIVITIES(\"" + table + "\".\"concept:name\", NODE['" + A + "'], EXCLUDING['" + B + "'])"
             # queries.add(col_name)
@@ -36,6 +38,8 @@ def co_excetence(table: str, activities):
     queries.add(case_id_query(table))
     for A in activities:
         for B in activities:
+            if A == B:
+                continue
             col_name = "Responded_Existence " + A + " TO " + B
             query = "CASE WHEN MATCH_ACTIVITIES(\"" + table + "\".\"concept:name\",NODE['" + A + "']) = MATCH_ACTIVITIES(\"" + table + "\".\"concept:name\",NODE['" + B + "']) THEN 1 ELSE 0 END"
             # queries.add(col_name)
