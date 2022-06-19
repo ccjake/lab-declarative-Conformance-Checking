@@ -1,4 +1,4 @@
-import pandas as pd
+
 from pycelonis import get_celonis
 from pycelonis import pql
 from pycelonis.celonis_api.pql.pql import PQL, PQLColumn, PQLFilter
@@ -26,7 +26,7 @@ class Celonis_Connect:
         self.celonis_url = celonis_url
         self.api_token = api_token
         self.c = get_celonis(url=celonis_url, api_token=api_token, key_type="USER_KEY", permissions=False)
-
+        self.datamodel = self.c.datamodels.find("0c6b4617-c643-42b5-8377-e99c974e65bb")
 
     def get_pools(self):
         """
@@ -59,10 +59,16 @@ class Celonis_Connect:
         @param datamodel_id: datamodel id, can be checked in pools
         """
         self.datamodel = self.c.datamodels.find(datamodel_id)
-        if (datamodel_id == []):
+        if (self.datamodel == []):
             return False
         else:
             return True
+    def get_datamodel(self):
+        '''
+
+        @return: datamodel selected datamodel
+        '''
+        return self.datamodel
 
     def get_table_dataframe(self,table_id):
         """
@@ -72,54 +78,29 @@ class Celonis_Connect:
         """
         return self.datamodel.tables.find(table_id).get_data_frame()
 
+
+    def get_activities(self):
+        '''
+
+        @param datamodel_id: datamodel id, can be checked in pools
+        @return: the list of activities(kinds of event) in the log
+        '''
+        if self.datamodel == []:
+            return "no datamodel"
+        activities_pql = PQL()
+        activities_pql.add(PQLColumn(name='event', query="\"example_log_xes\".\"concept:name\""))
+        activities = self.datamodel.get_data_frame(activities_pql)
+        activities = activities.loc[:, 'event'].drop_duplicates().values.tolist()
+        # print(len(activities))
+
+        return activities
+
 # log_converter.TO_EVENT_LOG
 
-# c = get_celonis(url=celonis_url, api_token=api_token, key_type="USER_KEY", permissions=False)
+c = get_celonis(url=celonis_url, api_token=api_token, key_type="USER_KEY", permissions=False)
 
 
-# cn = Celonis_Connect()
+cn = Celonis_Connect()
 # parameters = {log_converter.Variants.TO_EVENT_LOG.value.Parameters.CASE_ID_KEY: 'Case ID'}
-# datamodel = cn.c.datamodels.find("0c6b4617-c643-42b5-8377-e99c974e65bb")
-# t = datamodel.tables.find("ffae6ece-292c-4425-bca2-37269bf77539")
-# df = pd.DataFrame(t.get_data_frame())
-# log = log_converter.apply(log=df, parameters=parameters)
-# model = lsk_discovery.apply(log=log)
-# print(model)
-
-# cn = Celonis_Connect()
-# print(cn.get_datamodels())
 # cn.set_datamodel("0c6b4617-c643-42b5-8377-e99c974e65bb")
-# print(cn.get_table_dataframe("1c2acc5b-b636-4d13-b5c9-f8a38e5dc4bf"))
-# df =pd.DataFrame(cn.get_table_dataframe("1c2acc5b-b636-4d13-b5c9-f8a38e5dc4bf"))
-# df.to_csv("rum_log",sep=",")
-# print(cn.get_table_dataframe())
-# print(cn.c.datamodels.find("0c6b4617-c643-42b5-8377-e99c974e65bb").tables)
-# parameters = {log_converter.Variants.TO_EVENT_LOG.value.Parameters.CASE_ID_KEY:'Case ID'}
-              # log_converter.Variants.TO_EVENT_LOG.value.Parameters.CASE_ATTRIBUTE_PREFIX:"concept:"}
-# print(df.columns)
-# print(log)
-
-# skolen = lsk_discovery.apply(log= log)
-# print(skolen)
-
-#
-# datamodel = cn.c.datamodels.find("0c6b4617-c643-42b5-8377-e99c974e65bb")
-# # print(datamodel.tables)
-# t = datamodel.tables.find("ffae6ece-292c-4425-bca2-37269bf77539")
-# df = pd.DataFrame(t.get_data_frame())
-# log = log_converter.apply(log=df,parameters=parameters)
-
-# print(log)
-# skolen = lsk_discovery.apply(log= log)
-# print(skolen)
-
-# print(t.get_data_frame())
-
-# print(df.columns)
-# data = pd.DataFrame({'A': [1, 2, 3, 4], 'B': [5, 6, 7, 8], 'C': [9, 10, 11, 12]})
-# data.head()
-# data_pool = c.pools.find("d0c84d9c-23e0-4da8-ac52-3eac5c8aec45")
-# print(data_pool.tables)
-
-# print(analysis.data)
-# print(c.analyses.find("rum table").data)
+# print(cn.get_activities())
