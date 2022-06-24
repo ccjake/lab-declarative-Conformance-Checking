@@ -30,34 +30,46 @@ class TestModel(unittest.TestCase):
         pql_skeleton = declare_model_discover_by_template(
             self.datamodel, self.table_name, self.activities, template=TEMPLATE.Equivalence
         )
-        pql_skeleton_no_self_equiv = []
+        pql_skeleton.sort()
+
+        pql_skeleton_no_self = []
         for l in pql_skeleton:
             if l[0] != l[1]:
-                pql_skeleton_no_self_equiv.append(l)
+                pql_skeleton_no_self.append(l)
+        self.assertEqual(pql_skeleton_no_self, pm4py_skeleton)
 
-        pql_skeleton_no_self_equiv.sort()
-        self.assertEqual(pql_skeleton_no_self_equiv, pm4py_skeleton)
+    def test_template_always_after(self):
+        pm4py_skeleton = list(self.pm4py_sekelton_model['always_after'])
+        pm4py_skeleton.sort()
 
-    # def test_template_always_after(self):
-    #     pm4py_skeleton = list(self.pm4py_sekelton_model['always_after'])
-    #     pm4py_skeleton.sort()
-    #
-    #     pql_skeleton = declare_model_discover_by_template(
-    #         datamodel, table_name, activities, template=TEMPLATE.Always_After
-    #     )
-    #     pql_skeleton_no_self_equiv = []
-    #     for l in pql_skeleton:
-    #         if l[0] != l[1]:
-    #             pql_skeleton_no_self_equiv.append(l)
-    #
-    #     pql_skeleton_no_self_equiv.sort()
-    #     self.assertEqual(pql_skeleton_no_self_equiv, pm4py_skeleton)
+        pql_skeleton = declare_model_discover_by_template(
+            self.datamodel, self.table_name, self.activities, template=TEMPLATE.Always_After
+        )
+
+        pql_skeleton.sort()
+        self.assertEqual(pql_skeleton, pm4py_skeleton)
+
+
+    def test_template_always_before(self):
+        pm4py_skeleton = list(self.pm4py_sekelton_model['always_before'])
+        pm4py_skeleton.sort()
+
+        pql_skeleton = declare_model_discover_by_template(
+            self.datamodel, self.table_name, self.activities, template=TEMPLATE.Always_Before
+        )
+        pql_skeleton_no_self = []
+        for l in pql_skeleton:
+            if l[0] != l[1]:
+                pql_skeleton_no_self.append(l)
+
+        pql_skeleton_no_self.sort()
+        self.assertEqual(pql_skeleton_no_self, pm4py_skeleton)
 
 
 if __name__ == "__main":
     suite = unittest.TestSuite()
     suite.addTest(TestModel("test_template_equivalence"))
-    # suite.addTest(TestModel("test_multiple_templates_model"))
+    suite.addTest(TestModel("test_template_always_after"))
     # suite.addTest(TestModel("test_celnois_model"))
 
     runner = unittest.TestSuiteRunner()

@@ -23,30 +23,119 @@ def case_id_query(table):
     return PQLColumn(name="Case Id", query=cases_table)
 
 
-def equivalence_activities(table:str,activities):
+def equivalence_activities(table: str, activities):
     """
-        For 2 activities A and B, they are EQUIVALENCE iff they occur
-        eqully often in every trace
+    For 2 activities A and B, they are EQUIVALENCE iff they occur
+    eqully often in every trace
 
-        @param table: the name of querying table
-        @param activities: the activities variants of log
-        @return: list for query result
+    @param table: the name of querying table
+    @param activities: the activities variants of log
+    @return: list for query result
     """
     queries = PQL()
     queries.add(case_id_query(table))
 
     def sum_query(A):
-        return "SUM( CASE WHEN \"" + table + "\".\"concept:name\" = '" + A + "' THEN 1 ELSE 0 END)"
+        return (
+            'SUM( CASE WHEN "'
+            + table
+            + '"."concept:name" = \''
+            + A
+            + "' THEN 1 ELSE 0 END)"
+        )
 
     for A in activities:
         for B in activities:
             col_name = "equivalence_activities " + A + " TO " + B
             query = (
-                "CASE WHEN "+ sum_query(A) + " = " + sum_query(B) + "THEN 1 ELSE 0 END"
+                "CASE WHEN " + sum_query(A) + " = " + sum_query(B) + "THEN 1 ELSE 0 END"
             )
-            queries.add(PQLColumn(name = col_name,query = query))
+            queries.add(PQLColumn(name=col_name, query=query))
     return queries
 
+
+def always_after(table: str, activities):
+    queries = PQL()
+    queries.add(case_id_query(table))
+
+    def match_al_after(A, B):
+        return (
+            'MATCH_PROCESS_REGEX("'
+            + table
+            + '"."concept:name",(\''
+            + A
+            + "' >> ('*')* >> '"
+            + B
+            + "')) = 1 "
+        )
+
+    def vacuous_match_al_after(A, B):
+        return (
+            'MATCH_ACTIVITIES("'
+            + table
+            + '"."concept:name",NODE[\''
+            + B
+            + "'],EXCLUDING['"
+            + A
+            + "']) = 1 "
+        )
+
+    for A in activities:
+        for B in activities:
+            if A != B:
+                col_name = "always_after " + A + " TO " + B
+                query = (
+                    "CASE WHEN "
+                    + match_al_after(A, B)
+                    + "THEN 1 WHEN "
+                    + vacuous_match_al_after(A, B)
+                    + "THEN 1 ELSE 0 END"
+                )
+                queries.add(PQLColumn(name=col_name, query=query))
+
+    return queries
+
+
+def always_before(table: str, activities):
+    queries = PQL()
+    queries.add(case_id_query(table))
+
+    def match_al_before(A, B):
+        return (
+            'MATCH_PROCESS_REGEX("'
+            + table
+            + '"."concept:name",(\''
+            + B
+            + "' >> ('*')* >> '"
+            + A
+            + "')) = 1 "
+        )
+
+    def vacuous_match_al_before(A, B):
+        return (
+            'MATCH_ACTIVITIES("'
+            + table
+            + '"."concept:name",NODE[\''
+            + B
+            + "'],EXCLUDING['"
+            + A
+            + "']) = 1 "
+        )
+
+    for A in activities:
+        for B in activities:
+            if A != B:
+                col_name = "always_before " + A + " TO " + B
+                query = (
+                    "CASE WHEN "
+                    + match_al_before(A, B)
+                    + "THEN 1 WHEN "
+                    + vacuous_match_al_before(A, B)
+                    + "THEN 1 ELSE 0 END"
+                )
+                queries.add(PQLColumn(name=col_name, query=query))
+
+    return queries
 
 
 def responded_existence(table: str, activities):
@@ -60,13 +149,11 @@ def responded_existence(table: str, activities):
     queries = PQL()
     queries.add(case_id_query(table))
 
-
     for A in activities:
         for B in activities:
             if A == B:
                 continue
             col_name = "Responded_Existence " + A + " TO " + B
-
 
             query = (
                 '1 - MATCH_ACTIVITIES("'
@@ -145,5 +232,7 @@ template_func_dict = {
     # TEMPLATE.Responded_Existence: responded_existence,
     # TEMPLATE.Co_Excetence: co_excetence,
     # TEMPLATE.Responded: responded,
-    TEMPLATE.Equivalence:equivalence_activities
+    TEMPLATE.Equivalence: equivalence_activities,
+    TEMPLATE.Always_After: always_after,
+    TEMPLATE.Always_Before: always_before,
 }

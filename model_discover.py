@@ -22,10 +22,10 @@ def declare_model_discover_by_template(
     ## get the calcalation result by pql
     query = template_func_dict.get(template)(table, activities)
     df = datamodel.get_data_frame(query)
-    return pql_table_to_relation(template, df, activities)
+    return pql_table_to_relation(df, activities)
 
 
-def pql_table_to_relation(template, dataframe, activities):
+def pql_table_to_relation(dataframe, activities):
     """
 
     @param template: the template need to calculate
@@ -87,7 +87,7 @@ def declare_model_discover(datamodel, table: str, activities, templates):
     # )
     skeleton_dict = {}
     for template in templates:
-        skeleton_dict[TEMPLATE.Equivalence.value] = declare_model_discover_by_template(
+        skeleton_dict[template.value] = declare_model_discover_by_template(
             datamodel=datamodel, table=table, template=template, activities=activities
         )
 
