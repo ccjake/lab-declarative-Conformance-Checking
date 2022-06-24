@@ -97,10 +97,10 @@ class Celonis_Connect:
 
 # log_converter.TO_EVENT_LOG
 
-c = get_celonis(url=celonis_url, api_token=api_token, key_type="USER_KEY", permissions=False)
+# c = get_celonis(url=celonis_url, api_token=api_token, key_type="USER_KEY", permissions=False)
 
 
-cn = Celonis_Connect()
+# cn = Celonis_Connect()
 # parameters = {log_converter.Variants.TO_EVENT_LOG.value.Parameters.CASE_ID_KEY: 'Case ID'}
 # cn.set_datamodel("0c6b4617-c643-42b5-8377-e99c974e65bb")
 # print(cn.get_activities())

@@ -1,53 +1,63 @@
 import unittest
-from model_discover import declare_model_discover
+from model_discover import declare_model_discover, declare_model_discover_by_template
 from celonis_connect import Celonis_Connect
-import pandas as pd
-from pandas.util.testing import assert_frame_equal
 from relation_templates import TEMPLATE
-
+from pm4py.algo.discovery.log_skeleton import algorithm as lsk_discovery
+from pm4py.objects.log.importer.xes import importer as xes_importer
 
 class TestModel(unittest.TestCase):
-    def test_single_template_model(self):
-        cn = Celonis_Connect()
-        templates = [TEMPLATE.Co_Excetence]
-        df_dict = {"ER_Registration": ["ER_Sepsis_Triage", "ER_Triage", "IV_Antibiotics"],
-                   "ER_Sepsis_Triage": ["ER_Registration", "ER_Triage", "IV_Antibiotics"],
-                   "ER_Triage": ["ER_Registration", "ER_Sepsis_Triage", "IV_Antibiotics"],
-                   "IV_Antibiotics": ["ER_Registration", "ER_Sepsis_Triage", "ER_Triage"]}
-        pd_dict = {TEMPLATE.Co_Excetence: df_dict}
-        df = pd.DataFrame(pd_dict)
-        activities = cn.get_activities()
-        model = cn.get_datamodel()
-        tables = cn.get_tables("0c6b4617-c643-42b5-8377-e99c974e65bb")
-        table_name = list(tables.names.keys())[0]
-        dm = declare_model_discover(model, table_name, activities,
-                                    templates=templates)
-        assert_frame_equal(df, dm)
-
-    def test_multiple_templates_model(self):
-        cn = Celonis_Connect()
-        templates = [TEMPLATE.Co_Excetence, TEMPLATE.Responded_Existence]
-        df_dict = {"ER_Registration": ["ER_Sepsis_Triage", "ER_Triage","IV_Antibiotics" ],
-                   "ER_Sepsis_Triage": ["ER_Registration", "ER_Triage", "IV_Antibiotics"],
-                   "ER_Triage": ["ER_Registration", "ER_Sepsis_Triage", "IV_Antibiotics"],
-                   "IV_Antibiotics": ["ER_Registration", "ER_Sepsis_Triage", "ER_Triage"]}
-        pd_dict = {TEMPLATE.Co_Excetence: df_dict, TEMPLATE.Responded_Existence: df_dict}
-        df = pd.DataFrame(pd_dict)
-        print(df)
-        activities = cn.get_activities()
-        model = cn.get_datamodel()
-        tables = cn.get_tables("0c6b4617-c643-42b5-8377-e99c974e65bb")
-        table_name = list(tables.names.keys())[0]
-        dm = declare_model_discover(model, table_name, activities,
-                                    templates=templates)
-        print(dm)
-        assert_frame_equal(df, dm)
+    @classmethod
+    def setUpClass(cls):
+        cls.cn = Celonis_Connect()
+        test_log = xes_importer.apply("../example_log/example_log.xes")
+        cls.pm4py_sekelton_model = lsk_discovery.apply(test_log)
+        cls.datamodel = cls.cn.get_datamodel()
+        cls.activities = cls.cn.get_activities()
+        tables = cls.cn.get_tables("0c6b4617-c643-42b5-8377-e99c974e65bb")
+        cls.table_name = list(tables.names.keys())[0]
 
 
-if __name__ == '__main':
+
+    def test_template_equivalence(self):
+        """
+        test for equivalence realtion of the skeleton log from the pql calculation result
+
+
+        """
+        pm4py_skeleton = list(self.pm4py_sekelton_model['equivalence'])
+        pm4py_skeleton.sort()
+
+        pql_skeleton = declare_model_discover_by_template(
+            self.datamodel, self.table_name, self.activities, template=TEMPLATE.Equivalence
+        )
+        pql_skeleton_no_self_equiv = []
+        for l in pql_skeleton:
+            if l[0] != l[1]:
+                pql_skeleton_no_self_equiv.append(l)
+
+        pql_skeleton_no_self_equiv.sort()
+        self.assertEqual(pql_skeleton_no_self_equiv, pm4py_skeleton)
+
+    # def test_template_always_after(self):
+    #     pm4py_skeleton = list(self.pm4py_sekelton_model['always_after'])
+    #     pm4py_skeleton.sort()
+    #
+    #     pql_skeleton = declare_model_discover_by_template(
+    #         datamodel, table_name, activities, template=TEMPLATE.Always_After
+    #     )
+    #     pql_skeleton_no_self_equiv = []
+    #     for l in pql_skeleton:
+    #         if l[0] != l[1]:
+    #             pql_skeleton_no_self_equiv.append(l)
+    #
+    #     pql_skeleton_no_self_equiv.sort()
+    #     self.assertEqual(pql_skeleton_no_self_equiv, pm4py_skeleton)
+
+
+if __name__ == "__main":
     suite = unittest.TestSuite()
-    suite.addTest(TestModel("test_single_template_model"))
-    suite.addTest(TestModel("test_multiple_templates_model"))
+    suite.addTest(TestModel("test_template_equivalence"))
+    # suite.addTest(TestModel("test_multiple_templates_model"))
     # suite.addTest(TestModel("test_celnois_model"))
 
     runner = unittest.TestSuiteRunner()

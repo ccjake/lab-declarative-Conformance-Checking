@@ -1,37 +1,50 @@
 import pandas as pd
 from relation_templates import TEMPLATE
 from relation_templates import template_func_dict
+from celonis_connect import Celonis_Connect
 
 
+def declare_model_discover_by_template(
+    datamodel, table: str, activities, template=TEMPLATE.Equivalence
+):
+    """
+    discovery the model by templates, after that, all templates can be assembled into a skeleton model
 
-
-
-
-def declare_model_discover_by_template(datamodel,table:str,activities, template = TEMPLATE.Responded_Existence,support = 1):
+    @param datamodel: the dataframe from the preliminary calculation
+    @param table: the name of the selected table
+    @param activities: the activities of the whole log (as list)
+    @param template: the templates need to calculate
+    @return:
+    """
     # cn = Celonis_Connect()
     # activities = cn.get_activities()
-    query = template_func_dict.get(template)(table,activities)
-    df = datamodel.get_data_frame(query)
-    return remove_unsupported_relation(template,df,activities,support = support)
 
-def remove_unsupported_relation(template, dataframe,activities, support=1):
-    '''
+    ## get the calcalation result by pql
+    query = template_func_dict.get(template)(table, activities)
+    df = datamodel.get_data_frame(query)
+    return pql_table_to_relation(template, df, activities)
+
+
+def pql_table_to_relation(template, dataframe, activities):
+    """
 
     @param template: the template need to calculate
     @param dataframe: the dataframe from the preliminary calculation
     @param support: constraints support
     @return:
-    '''
+    """
     remove_list = []
     colums = dataframe.columns.values.tolist()[1:]
     colums.sort()
-    template_dict = {}
+    # template_dict = {}
+    template_list = []
     activities.sort()
-    for activity in activities:
-        template_dict[activity] = []
+
+    # for activity in activities:
+    #     template_dict[activity] = []
     for col in colums:
         su = dataframe[col].sum()
-        if ((su / dataframe.shape[0]) < support):
+        if su < dataframe.shape[0]:
             remove_list.append(col)
     pruned_df = dataframe.drop(columns=remove_list)
 
@@ -40,27 +53,55 @@ def remove_unsupported_relation(template, dataframe,activities, support=1):
         A_B = t.split(" ")
         A = A_B[-3]
         B = A_B[-1]
-        template_dict[A].append(B)
-        template_dict[A].sort()
-    pd_dict = {template: template_dict}
+        template_list.append((A, B))
 
-    return pd.DataFrame(data=pd_dict)
+        # template_dict[A].append(B)
+        # template_dict[A].sort()
+    # pd_dict = {template: template_dict}
+
+    # return pd.DataFrame(data=pd_dict)
+    template_list.sort()
+    return template_list
 
 
-
-def declare_model_discover(datamodel,table:str,activities,templates):
-    '''
+def declare_model_discover(datamodel, table: str, activities, templates):
+    """
 
     @param templates: the templates selected from users
     @param table: the table name of the activity table
     @return: the declare model showed in Dataframe
-    '''
+    """
+    tamplates = [
+        TEMPLATE.Equivalence
+        # TEMPLATE.Always_After,
+        # TEMPLATE.Always_Before,
+        # TEMPLATE.Never_Together,
+        # TEMPLATE.Directly_Follows,
+        # TEMPLATE.Activity_Frequency,
+    ]
     template = templates[0]
     print(template)
-    df = declare_model_discover_by_template(datamodel = datamodel,table = table,template=template,activities=activities)
-    for template in templates[1:]:
-        df = df.join(declare_model_discover_by_template(datamodel = datamodel,table = table,template=template,activities=activities))
-    return df
+
+    # df = declare_model_discover_by_template(
+    #     datamodel=datamodel, table=table, template=template, activities=activities
+    # )
+    skeleton_dict = {}
+    for template in templates:
+        skeleton_dict[TEMPLATE.Equivalence.value] = declare_model_discover_by_template(
+            datamodel=datamodel, table=table, template=template, activities=activities
+        )
+
+    # for template in templates[1:]:
+    #     df = df.join(
+    #         declare_model_discover_by_template(
+    #             datamodel=datamodel,
+    #             table=table,
+    #             template=template,
+    #             activities=activities,
+    #         )
+    #     )
+    return skeleton_dict
+
 
 # cn = Celonis_Connect()
 # activities = cn.get_activities()
@@ -68,8 +109,13 @@ def declare_model_discover(datamodel,table:str,activities,templates):
 # tables = cn.get_tables("0c6b4617-c643-42b5-8377-e99c974e65bb")
 # table_name = list(tables.names.keys())[0]
 # # print(table_name)
-# dm = declare_model_discover(model,table_name,activities,templates=[TEMPLATE.Co_Excetence,TEMPLATE.Responded_Existence])
+# dm = declare_model_discover(
+#     model, table_name, activities, templates=[TEMPLATE.Equivalence]
+# )
+# print(dm)
+# dm = declare_model_discover(
+#     model, table_name, activities, templates=[TEMPLATE.Responded]
+# )
 # print(dm)
 
 # template_func_dict.get("p1")(5)
-
