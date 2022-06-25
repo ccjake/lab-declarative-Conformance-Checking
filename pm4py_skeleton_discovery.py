@@ -9,7 +9,7 @@ def declare_model_discover(path):
     skolen = lsk_discovery.apply(log= log,parameters={lsk_discovery.Variants.CLASSIC.value.Parameters.NOISE_THRESHOLD: 0.0})
     return skolen
 
-skeleton_model = declare_model_discover("/Users/baichaoye/RWTH笔记/SS2022/LAB/logs/example_log2.xes")
+skeleton_model = declare_model_discover("example_log/synthetic event log.xes")
 # l  = list(skeleton_model["equivalence"])
 # l.sort()
 print(skeleton_model)

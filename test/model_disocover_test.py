@@ -9,12 +9,14 @@ class TestModel(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.cn = Celonis_Connect()
-        test_log = xes_importer.apply("../example_log/example_log.xes")
+        test_log = xes_importer.apply("../example_log/synthetic event log.xes")
         cls.pm4py_sekelton_model = lsk_discovery.apply(test_log)
+        cls.cn.set_datamodel("02654e7f-c480-4bc9-b014-5539bee182ec")
         cls.datamodel = cls.cn.get_datamodel()
+        cls.cn.set_table("synthetic_event_log_xes")
+
+        cls.table_name = cls.cn.get_table().name
         cls.activities = cls.cn.get_activities()
-        tables = cls.cn.get_tables("0c6b4617-c643-42b5-8377-e99c974e65bb")
-        cls.table_name = list(tables.names.keys())[0]
 
 
 

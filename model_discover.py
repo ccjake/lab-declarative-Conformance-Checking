@@ -71,14 +71,7 @@ def declare_model_discover(datamodel, table: str, activities, templates):
     @param table: the table name of the activity table
     @return: the declare model showed in Dataframe
     """
-    tamplates = [
-        TEMPLATE.Equivalence
-        # TEMPLATE.Always_After,
-        # TEMPLATE.Always_Before,
-        # TEMPLATE.Never_Together,
-        # TEMPLATE.Directly_Follows,
-        # TEMPLATE.Activity_Frequency,
-    ]
+
     template = templates[0]
     print(template)
 
@@ -91,31 +84,7 @@ def declare_model_discover(datamodel, table: str, activities, templates):
             datamodel=datamodel, table=table, template=template, activities=activities
         )
 
-    # for template in templates[1:]:
-    #     df = df.join(
-    #         declare_model_discover_by_template(
-    #             datamodel=datamodel,
-    #             table=table,
-    #             template=template,
-    #             activities=activities,
-    #         )
-    #     )
+
     return skeleton_dict
 
 
-# cn = Celonis_Connect()
-# activities = cn.get_activities()
-# model = cn.get_datamodel()
-# tables = cn.get_tables("0c6b4617-c643-42b5-8377-e99c974e65bb")
-# table_name = list(tables.names.keys())[0]
-# # print(table_name)
-# dm = declare_model_discover(
-#     model, table_name, activities, templates=[TEMPLATE.Equivalence]
-# )
-# print(dm)
-# dm = declare_model_discover(
-#     model, table_name, activities, templates=[TEMPLATE.Responded]
-# )
-# print(dm)
-
-# template_func_dict.get("p1")(5)
