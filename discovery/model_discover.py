@@ -1,7 +1,7 @@
 from pycelonis.celonis_api.pql.pql import PQL, PQLColumn
 
 from templates import TEMPLATE
-from templates_func import template_func_dict
+from discovery.templates_func import template_func_dict
 
 
 def declare_model_discover(datamodel, table: str):

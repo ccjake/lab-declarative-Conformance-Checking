@@ -1,7 +1,7 @@
 import unittest
-from model_discover import declare_model_discover, declare_model_discover_by_template
+from discovery.model_discover import declare_model_discover, declare_model_discover_by_template
 from celonis_connect import Celonis_Connect
-from templates_func import *
+from discovery.templates_func import *
 from pm4py.algo.discovery.log_skeleton import algorithm as lsk_discovery
 from pm4py.objects.log.importer.xes import importer as xes_importer
 
