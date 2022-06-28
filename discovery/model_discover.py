@@ -4,7 +4,7 @@ from templates import TEMPLATE
 from discovery.templates_func import template_func_dict
 
 
-def declare_model_discover(datamodel, table: str):
+def declare_model_discover(datamodel, table: str, noise_threshold = 0.0):
     """
 
     @param templates: the templates selected from users
@@ -38,13 +38,14 @@ def declare_model_discover(datamodel, table: str):
             table=table,
             activities_df=activities_df,
             template=template,
+            noise_threshold=noise_threshold
         )
 
     return skeleton_dict
 
 
 def declare_model_discover_by_template(
-    datamodel, table: str, activities_df, template=TEMPLATE.Equivalence
+    datamodel, table: str, activities_df, template, noise_threshold = 0.0
 ):
     """
     discovery the model by templates, after that, all templates can be assembled into a skeleton model
@@ -56,5 +57,5 @@ def declare_model_discover_by_template(
     @return:
     """
 
-    return template_func_dict.get(template)(datamodel, table, activities_df)
+    return template_func_dict.get(template)(datamodel, table, activities_df,noise_threshold)
 

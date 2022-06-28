@@ -37,6 +37,8 @@ class TestModel(unittest.TestCase):
 
         # cls.activities = cls.cn.get_activities()
 
+
+
     def test_template_equivalence(self):
         """
         test for equivalence template
@@ -48,7 +50,7 @@ class TestModel(unittest.TestCase):
             self.datamodel,
             self.table_name,
             self.activities_df,
-            template=TEMPLATE.Equivalence,
+            template=TEMPLATE.Equivalence
         )
         pql_skeleton.sort()
 
@@ -150,6 +152,48 @@ class TestModel(unittest.TestCase):
         pql_skeleton = declare_model_discover(self.datamodel,self.table_name)
         self.assertDictEqual(self.pm4py_sekelton_model,pql_skeleton)
 
+
+
+    def test_template_euqivalence_with_noise(self):
+        """
+        add noise to test the model by skeleton algo discovered model in pm4py
+        @return:
+        """
+        test_log = xes_importer.apply("../example_log/synthetic event log.xes")
+        for i in range(0,10,2):
+            noise = i/10
+            pm4py_sekelton_model = lsk_discovery.apply(test_log,parameters={lsk_discovery.Variants.CLASSIC.value.Parameters.NOISE_THRESHOLD: noise})
+
+            for k in pm4py_sekelton_model.keys():
+                if k == TEMPLATE.Activity_Frequency.value:
+                    continue
+                pm4py_sekelton_model[k] = list(pm4py_sekelton_model[k])
+                pm4py_sekelton_model[k].sort()
+            pql_skeleton = declare_model_discover_by_template(
+                self.datamodel,
+                self.table_name,
+                self.activities_df,
+                template=TEMPLATE.Equivalence,
+                noise_threshold=noise
+            )
+            pm4py_skeleton = pm4py_sekelton_model["equivalence"]
+            pql_skeleton.sort()
+
+            self.assertEqual(pm4py_skeleton, pql_skeleton)
+
+    def test_skeleton_discovery_with_noise(self):
+        test_log = xes_importer.apply("../example_log/synthetic event log.xes")
+        for i in range(0,10,2):
+            noise = i/10
+            pm4py_sekelton_model = lsk_discovery.apply(test_log,parameters={lsk_discovery.Variants.CLASSIC.value.Parameters.NOISE_THRESHOLD: noise})
+            for k in pm4py_sekelton_model.keys():
+                if k == TEMPLATE.Activity_Frequency.value:
+                    continue
+                pm4py_sekelton_model[k] = list(pm4py_sekelton_model[k])
+                pm4py_sekelton_model[k].sort()
+            pql_skeleton = declare_model_discover(self.datamodel,self.table_name,noise_threshold=noise)
+
+            self.assertEqual(pm4py_sekelton_model, pql_skeleton)
 
 if __name__ == "__main":
     suite = unittest.TestSuite()

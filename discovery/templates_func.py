@@ -1,22 +1,24 @@
 from pycelonis.celonis_api.pql.pql import PQL, PQLColumn, PQLFilter
 from templates import TEMPLATE
-
-
+import pandas as pd
 
 def case_id_query(table):
     cases_table = '"' + table + "_CASES" + '"."CASE ID"'
     return PQLColumn(name="Case Id", query=cases_table)
 
 
-def equivalence_activities(datamodel, table: str, activities_df):
+def equivalence_activities(datamodel, table: str, activities_df,noise_threshold):
     """
     For 2 activities A and B, they are EQUIVALENCE iff they occur
     eqully often in every trace
 
+    @param datamodel: the datamodel from celonis
     @param table: the name of querying table
-    @param activities: the activities variants of log
-    @return: list for query result
+    @param activities_df: the activities variants of log
+    @param noise_threshold: the noise
+    @return: a list of pairs acitivities correspond equivalence
     """
+
     activities = list(activities_df.index.values)
     queries = PQL()
     queries.add(case_id_query(table))
@@ -47,10 +49,20 @@ def equivalence_activities(datamodel, table: str, activities_df):
                 queries.add(PQLColumn(name=col_name, query=query))
     df = datamodel.get_data_frame(queries)
 
-    return pql_table_to_relation(df, activities_df)
+    return pql_table_to_relation(df, activities_df,noise_threshold)
 
 
-def always_after(datamodel, table: str, activities_df):
+def always_after(datamodel, table: str, activities_df,noise_threshold):
+    """
+    An occurrence of activity A always followed by acitivity B
+
+
+    @param datamodel: the datamodel from celonis
+    @param table: the name of querying table
+    @param activities_df: the activities variants of log
+    @param noise_threshold: the noise
+    @return: a list of pairs acitivities correspond always after
+    """
     activities = list(activities_df.index.values)
     queries = PQL()
     queries.add(case_id_query(table))
@@ -69,10 +81,22 @@ def always_after(datamodel, table: str, activities_df):
                 queries.add(PQLColumn(name=col_name, query=query))
     df = datamodel.get_data_frame(queries)
 
-    return pql_table_to_relation(df, activities_df)
+    return pql_table_to_relation(df, activities_df,noise_threshold)
 
 
-def always_before(datamodel, table: str, activities_df):
+def always_before(datamodel, table: str, activities_df,noise_threshold):
+    """
+    An occurrence of activity B always precceded by acitivity A
+
+
+    @param datamodel: the datamodel from celonis
+    @param table: the name of querying table
+    @param activities_df: the activities variants of log
+    @param noise_threshold: the noise
+    @return: a list of pairs acitivities correspond always before
+    """
+
+
     activities = list(activities_df.index.values)
     queries = PQL()
     queries.add(case_id_query(table))
@@ -94,10 +118,23 @@ def always_before(datamodel, table: str, activities_df):
                 queries.add(PQLColumn(name=col_name, query=query))
     df = datamodel.get_data_frame(queries)
 
-    return pql_table_to_relation(df, activities_df)
+    return pql_table_to_relation(df, activities_df,noise_threshold)
 
 
-def never_together(datamodel, table: str, activities_df):
+def never_together(datamodel, table: str, activities_df,noise_threshold):
+
+    """
+
+    Two acitivities A and B nerver occur in one trace
+
+
+    @param datamodel: the datamodel from celonis
+    @param table: the name of querying table
+    @param activities_df: the activities variants of log
+    @param noise_threshold: the noise
+    @return: a list of pairs acitivities correspond never together
+    """
+
     activities = list(activities_df.index.values)
     queries = PQL()
     queries.add(case_id_query(table))
@@ -117,10 +154,20 @@ def never_together(datamodel, table: str, activities_df):
                 queries.add(PQLColumn(name=col_name, query=query))
     df = datamodel.get_data_frame(queries)
 
-    return pql_table_to_relation(df, activities_df)
+    return pql_table_to_relation(df, activities_df,noise_threshold)
 
 
-def directly_follows(datamodel, table: str, activities_df):
+def directly_follows(datamodel, table: str, activities_df,noise_threshold):
+    """
+
+    Acitivity A directly followed by activity B
+
+    @param datamodel: the datamodel from celonis
+    @param table: the name of querying table
+    @param activities_df: the activities variants of log
+    @param noise_threshold: the noise
+    @return: a list of pairs acitivities correspond directly follows
+    """
     activities = list(activities_df.index.values)
     queries = PQL()
     queries.add(case_id_query(table))
@@ -133,37 +180,66 @@ def directly_follows(datamodel, table: str, activities_df):
             queries.add(PQLColumn(name=col_name, query=query))
     df = datamodel.get_data_frame(queries)
 
-    return pql_table_to_relation(df, activities_df)
+    return pql_table_to_relation(df, activities_df,noise_threshold)
 
 
-def activ_freq(datamodel, table: str, activities_df):
+def activ_freq(datamodel, table: str, activities_df, noise_threshold):
+    """
+    Activities frequency
+
+    @param datamodel: the datamodel from celonis
+    @param table: the name of querying table
+    @param activities_df: the activities variants of log
+    @param noise_threshold: the noise
+    @return: the activities freq of the log (considering the noise)
+    """
     activities = list(activities_df.index.values)
     queries = PQL()
-    queries.add(case_id_query(table))
-    queries.add(PQLColumn(name="activity",query= "VARIANT(\""+table+"\".\"concept:name\")"))
-    queries.add(PQLColumn(name="frequency",query="COUNT(\"" + table+"_cases\".\"Case Id\")"))
-    df = datamodel.get_data_frame(queries)
-    activities_list = list(df['activity'].values)
+    # queries.add(case_id_query(table))
+    queries.add(PQLColumn(name="trace", query="VARIANT(\"" + table + "\".\"concept:name\")"))
+    queries.add(PQLColumn(name="frequency", query="COUNT(\"" + table + "_cases\".\"Case Id\")"))
+    df = pd.DataFrame(datamodel.get_data_frame(queries))
+    df.set_index('trace', inplace=True)
+    trace_list = list(df.index.values)
+
+    log_traces = sum(df['frequency'])
+
     activ_freq = {}
     for activity in activities:
-        ac_freq = []
-        for trace in activities_list:
-            ac_freq.append(trace.count(activity))
-        activ_freq[activity] = set([min(ac_freq), max(ac_freq)])
+        freq_number = {}
+        for trace in trace_list:
+            freq = trace.count(activity)
+            if freq not in list(freq_number.keys()):
+                freq_number[freq] = df.loc[trace, "frequency"]
+            else:
+                freq_number[freq] += df.loc[trace, "frequency"]
+        threshold = 0
+        freq_list = []
+        numer_freq = dict(zip(freq_number.values(), freq_number.keys()))
 
-
+        for key in sorted(list(numer_freq.keys()), reverse=True):
+            threshold += key
+            freq_list.append(numer_freq[key])
+            if (threshold < log_traces * (1 - noise_threshold)):
+                continue
+            else:
+                activ_freq[activity] = set(freq_list)
+                break
 
     return activ_freq
     # df.set_index("activity",inplace=True)
 
 
-def pql_table_to_relation(pql_df, activities_df):
+def pql_table_to_relation(pql_df, activities_df,noise_threshold):
     """
 
-    @param template: the template need to calculate
-    @param dataframe: the dataframe from the preliminary calculation
-    @param support: constraints support
-    @return:
+    Transform the dataframe by PQL queried to the relation list
+
+    @param datamodel: the datamodel from celonis
+    @param table: the name of querying table
+    @param activities_df: the activities variants of log
+    @param noise_threshold: the noise
+    @return: the relation list
     """
     remove_list = []
     colums = pql_df.columns.values.tolist()[1:]
@@ -175,7 +251,7 @@ def pql_table_to_relation(pql_df, activities_df):
     for col in colums:
         A = col.split(" ")[-3]
         su = pql_df[col].sum()
-        if su < activities_df.loc[A, "frequency"]:
+        if su < activities_df.loc[A, "frequency"] * (1-noise_threshold):
             remove_list.append(col)
     pruned_df = pql_df.drop(columns=remove_list)
 
@@ -191,6 +267,7 @@ def pql_table_to_relation(pql_df, activities_df):
 
 
 template_func_dict = {
+
     TEMPLATE.Equivalence: equivalence_activities,
     TEMPLATE.Always_After: always_after,
     TEMPLATE.Always_Before: always_before,
