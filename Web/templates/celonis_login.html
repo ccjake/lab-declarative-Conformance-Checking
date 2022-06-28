@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
+    <title>Declare Model</title>
+</head>
+<body>
+<br><br><br><br><br><br><br>
+
+<h1>Please input Celonis Url and Token</h1>
+<form method="POST" action="">
+    <table>
+        <tr>
+            <th align="right"><label>Celonis Url</label></th>
+            <th><input name="celonis_url" id="celonis_url" size="50" type="url"/></th>
+        </tr>
+        <tr>
+            <th align="right">Token</th>
+            <th><input type="password" id="celonis_token" name="celonis_token" size="50" required></th>
+        </tr>
+    </table>
+    <br>
+    <input type="submit" value="connect">
+</form>
+</body>
+</html>
