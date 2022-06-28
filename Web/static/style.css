@@ -1,9 +1,52 @@
 body {
     margin: auto;
-    max-width: 580px;
+    max-width: 1080px;
     font-size: 15px;
     font-family: Helvetica, Arial, sans-serif;
+    /*border: 1px solid black;*/
 }
 
 
 
+.select{
+    width: 150px;
+    height: 500px;
+    /*position: center;*/
+    display: inline-block;
+    margin: 200px;
+    text-decoration: none;
+    margin-left: auto;
+    margin-right: auto;
+    text-align:center;
+    vertical-align: top;
+
+}
+.select_div{
+    /*display: table-cell;*/
+    height: 900px;
+    text-align:center;
+    /*vertical-align:bottom;*/
+    position: relative;
+    /*height: 30px;*/
+}
+
+.select_url{
+    text-decoration: none;
+    width: 150px;
+    height: 150px;
+    /*border: 1px solid red;*/
+
+}
+
+.login{
+
+    position: relative;
+    text-align:center;
+}
+
+.login_table{
+    display: inline-block;
+    position: relative;
+    text-align:center;
+    /*border: 4px solid black;*/
+}

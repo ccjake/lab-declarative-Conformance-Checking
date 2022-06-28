@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, render_template, request, redirect, url_for,flash
 import os
 from os.path import join, dirname, realpath
 from celonis_connect import Celonis_Connect
@@ -23,6 +23,7 @@ def allowed_file(filename):
 @app.route("/", methods=["POST", "GET"])
 def login_celonis():
     # Set The upload HTML template '\templates\upload.html'
+    Failed = None
     if request.method == "POST":
         celonis_url = str(request.form.get("celonis_url"))
         celonis_toke = str(request.form.get("celonis_token"))
@@ -31,43 +32,39 @@ def login_celonis():
         global cn
         try:
             cn = Celonis_Connect(celonis_url=celonis_url, api_token=celonis_toke)
-            return redirect("/index")
+            return redirect("/select_function")
         except:
             cn = "no connection"
             print("except")
-            return redirect("/")
-    # cn = Celonis_Connect(celonis_url="")
+            Failed = "connect falied"
+            # flash("connect falied")
+            # return redirect(url_for('login_celonis'))
 
-    return render_template("celonis_login.html")
-
-
-# Root URLh
-@app.route("/index", methods=["POST", "GET"])
-def index():
-    global cn
-    if cn == "no connection":
-        print(cn)
-        return redirect(url_for("login_celonis"))
-    # Set The upload HTML template '\templates\upload.html'
-    return render_template("upload.html")
+    return render_template("celonis_login.html",error=Failed)
 
 
-#
+@app.route("/select_function", methods=["POST", "GET"])
+def select():
+
+    return render_template("select_func.html")
+
 
 # Get the uploaded files
-# @app.route("/", methods=["GET", "POST"])
-# def uploadFiles():
-#     # get the uploaded file
-#     if request.method == 'POST':  # 当以post方式提交数据时
-#         uploaded_file = request.files["event_log"]
-#         if uploaded_file.filename != "":
-#
-#             file_path = os.path.join(app.config["UPLOAD_FOLDER"], uploaded_file.filename)
-#             print(uploaded_file.filename)
-#
-#         uploaded_file.save(file_path)
-#     # save the file
-#     return redirect("upload.html")
+@app.route("/upload", methods=["GET", "POST"])
+def uploadFiles():
+    # get the uploaded file
+    if request.method == "POST":  # 当以post方式提交数据时
+        uploaded_file = request.files["event_log"]
+        if uploaded_file.filename != "":
+
+            file_path = os.path.join(
+                app.config["UPLOAD_FOLDER"], uploaded_file.filename
+            )
+            print(uploaded_file.filename)
+
+        uploaded_file.save(file_path)
+    # save the file
+    return render_template("upload.html")
 
 
 if __name__ == "__main__":

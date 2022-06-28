@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="{{ url_for('static', filename='/images/web_logo.png') }}">
+    <title>Select Function</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
+</head>
+<body>
+
+<div class="select_div">
+<span class="select">
+        <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url">
+            <button>
+                <img src="{{ url_for('static',filename = '/images/upload.png') }}" width="120px">
+                <br>
+
+            </button>
+        </a>
+    <label>Data Upload</label>
+    </span>
+<span class="select">
+        <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url">
+            <button>
+                <img src="{{ url_for('static',filename = '/images/upload.png') }}" width="120px">
+                <br>
+
+            </button>
+        </a>
+    <label>Data Upload</label>
+    </span>
+<span class="select">
+        <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url">
+            <button>
+                <img src="{{ url_for('static',filename = '/images/discover.png') }}" width="120px">
+                <br>
+
+            </button>
+        </a>
+        <label>Model Discover</label>
+    </span>
+<span class="select">
+    <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url" >
+        <button>
+            <img src="{{ url_for('static',filename = '/images/conformance.png') }}" width="120px">
+            <br>
+
+        </button>
+    </a>
+    <label>Conformance Checking</label>
+    </span>
+</div>
+</body>
+</html>
