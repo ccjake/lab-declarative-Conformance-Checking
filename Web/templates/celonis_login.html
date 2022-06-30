@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
 <head>
     <meta charset="UTF-8">
     <link rel="icon" href="{{ url_for('static', filename='/images/web_logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
-    <script src="{{ url_for('static',filename = 'jquery-3.6.0.min.js') }}"></script>
+    <link rel="stylesheet" href="../static/style.css">
+
+    <script src="../static/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
     <title>Declare Model</title>
 </head>
 <body>
@@ -31,15 +32,45 @@
     <input type="submit" value="connect">
 </form>
 
+<button class="add_pool_open">Click me!</button>
+<button class="add_datamodel_open">Click me!</button>
+<button class="add_table_open">Click me!</button>
+
+<section id="add_pool">
+    <h2>Add Pool</h2>
+    <form>
+        <input type="text">
+        <input type="submit" value="add pool">
+    </form>
+</section>
+
+<section id="add_datamodel">
+    <h2>Add Datamodel</h2>
+    <form>
+        <input type="text">
+        <input type="submit" value="add pool">
+    </form>
+</section>
+
+<section id="add_table">
+    <h2>Add Table</h2>
+    <form>
+        <input type="file">
+        <input type="submit" value="add pool">
+    </form>
+</section>
+
+<script>
+    $('#add_pool').popup();
+    $('#add_datamodel').popup();
+    $('#add_table').popup();
+
+
+</script>
 </div>
 
-<div data-role="main" class="ui-content">
-    <a href="#myPopup" data-rel="popup" class="ui-btn ui-btn-inline ui-corner-all">显示弹窗</a>
 
-    <div data-role="popup" id="myPopup" class="ui-content" data-dismissible="false" style="max-width:400px;">
-      <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn ui-icon-delete ui-btn-icon-notext ui-btn-right">关闭</a>
-      <p>我是不可取消的按钮 (data-dismissible="false)。唯一关闭这个弹窗的方式是通过点击右上角的关闭按钮。你无法通过点击弹窗之外的区域关闭弹窗。</p>
-    </div>
-  </div>
+
+
 </body>
 </html>
