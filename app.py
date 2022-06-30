@@ -3,6 +3,11 @@ import os
 from os.path import join, dirname, realpath
 from celonis_connect import Celonis_Connect
 from werkzeug.utils import secure_filename
+import sys
+# sys.path.append(r'./')
+
+
+
 app = Flask(__name__)
 
 # enable debugging mode
