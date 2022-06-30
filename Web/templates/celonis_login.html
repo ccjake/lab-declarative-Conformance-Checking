@@ -12,64 +12,26 @@
 <br><br><br><br><br><br><br>
 
 <div class="login">
-<h1>Please input Celonis Url and Token</h1>
+    <h1>Please input Celonis Url and Token</h1>
 
-{% if result %}
-    <p class=error><strong>{{ result}}</strong></p>
-{% endif %}
-<form method="POST" action="" >
-    <table class="login_table">
-        <tr>
-            <th align="right"><label>Celonis Url</label></th>
-            <th><input name="celonis_url" id="celonis_url" size="50" type="url"/></th>
-        </tr>
-        <tr>
-            <th align="right">Token</th>
-            <th><input type="password" id="celonis_token" name="celonis_token" size="50" required></th>
-        </tr>
-    </table>
-    <br>
-    <input type="submit" value="connect">
-</form>
-
-<button class="add_pool_open">Click me!</button>
-<button class="add_datamodel_open">Click me!</button>
-<button class="add_table_open">Click me!</button>
-
-<section id="add_pool">
-    <h2>Add Pool</h2>
-    <form>
-        <input type="text">
-        <input type="submit" value="add pool">
-    </form>
-</section>
-
-<section id="add_datamodel">
-    <h2>Add Datamodel</h2>
-    <form>
-        <input type="text">
-        <input type="submit" value="add pool">
-    </form>
-</section>
-
-<section id="add_table">
-    <h2>Add Table</h2>
-    <form>
-        <input type="file">
-        <input type="submit" value="add pool">
-    </form>
-</section>
-
-<script>
-    $('#add_pool').popup();
-    $('#add_datamodel').popup();
-    $('#add_table').popup();
-
-
-</script>
+    {% if result %}
+        <p class=error><strong>{{ result }}</strong></p>
+    {% endif %}
+        <form method="POST" action="">
+            <table class="login_table">
+                <tr>
+                    <th align="right"><label>Celonis Url</label></th>
+                    <th><input name="celonis_url" id="celonis_url" size="50" type="url"/></th>
+                </tr>
+                <tr>
+                    <th align="right">Token</th>
+                    <th><input type="password" autocomplete="current-password" id="celonis_token" name="celonis_token" size="50" required></th>
+                </tr>
+            </table>
+            <br>
+            <input type="submit" value="connect">
+        </form>
 </div>
-
-
 
 
 </body>

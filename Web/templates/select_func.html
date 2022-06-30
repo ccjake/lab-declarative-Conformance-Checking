@@ -10,7 +10,7 @@
 
 <div class="select_div">
 <span class="select">
-        <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url">
+        <a href="{{ url_for( 'table_management' ) }}" class="select_url">
             <button>
                 <img src="{{ url_for('static',filename = '/images/upload.png') }}" width="120px">
                 <br>
@@ -19,8 +19,8 @@
         </a>
     <label>Data Upload</label>
     </span>
-<span class="select">
-        <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url">
+    <span class="select">
+        <a href="{{ url_for( 'table_management' ) }}" class="select_url">
             <button>
                 <img src="{{ url_for('static',filename = '/images/upload.png') }}" width="120px">
                 <br>
@@ -29,18 +29,11 @@
         </a>
     <label>Data Upload</label>
     </span>
-<span class="select">
-        <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url">
-            <button>
-                <img src="{{ url_for('static',filename = '/images/discover.png') }}" width="120px">
-                <br>
 
-            </button>
-        </a>
-        <label>Model Discover</label>
-    </span>
-<span class="select">
-    <a href="{{ url_for( 'uploadFiles' ) }}" class="select_url" >
+
+
+    <span class="select">
+    <a href="{{ url_for( 'table_management' ) }}" class="select_url">
         <button>
             <img src="{{ url_for('static',filename = '/images/conformance.png') }}" width="120px">
             <br>

@@ -3,22 +3,23 @@
 <head>
     <title>Upload file</title>
     <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
     <script src="../static/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
 </head>
 <body>
 
-<h1>Upload file</h1>
-<form method="POST" action="" enctype="multipart/form-data">
-    <p><input type="file" name="event_log" lang="en"></p>
-    <p><input type="submit" value="upload log"></p>
-</form>
+{#<h1>Upload file</h1>#}
+{#<form method="POST" action="" enctype="multipart/form-data">#}
+{#    <p><input type="file" name="event_log" lang="en"></p>#}
+{#    <p><input type="submit" value="upload log"></p>#}
+{#</form>#}
 
 
 <select id='pools'>
     <option style="display: none"></option>
     {% for pool in pools %}
-    <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
+        <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
     {% endfor %}
 </select>
 
@@ -29,28 +30,55 @@
 <select id="table">
 </select>
 
+<button class="add_pool_open" id="add_pool_open">add pool</button>
+<button class="add_datamodel_open" id="add_datamodel_open">add datamodel</button>
+<button class="add_table_open" id="add_table_open">add table</button>
 
 
-<input type="button" id="add_pool" onclick="add_pool()" value="add pool" />
-<input type="button" id="add_datamodel" value="add datamodel"/>
-<input type="button" id="add_table" value="add table"/>
+<section id="add_pool">
+    <h2>Add Pool</h2>
+    <form method="POST">
+        <input type="text" name="add_pool" required>
+        <input type="submit" value="add pool">
+    </form>
+</section>
 
-<div class="dialog" id="myform">
-    <form>
-      <label id="valueFromMyButton">
-      </label>
-      <input type="text" id="name">
-      <div align="center">
-        <input type="button" value="Ok" id="btnOK">
-      </div>
-	</form>
-  </div>
+<section id="add_datamodel">
+    <h2>Add Datamodel</h2>
+    <form method="POST">
+        <input type="text" name="add_datamodel" id="to_add_datamodel_name" required >
+        <input type="submit" value="add datamodel">
+    </form>
+</section>
 
+<section id="add_table">
+    <h2>Add Table</h2>
+    <form method="POST" enctype=multipart/form-data>
+        <input type="file" name="add_table" id="to_add_table" required accept=".xes">
+        <input type="submit"  value="add table">
+    </form>
+</section>
+
+
+<script>
+    $('#add_pool').popup();
+    $('#add_datamodel').popup();
+    $('#add_table').popup();
+</script>
+
+{% if error %}
+    <script>
+        $(function () {
+            $(alert("{{ error }}"))
+        })
+    </script>
+{% endif %}
 {#after selecting pool, datamodels selections show, enable add datamodel; after selecting datamodel, tables show selection show, enable add table#}
 <script>
-
-    var datamodels = {{ datamodels | tojson }}
-    var tables = {{ tables | tojson }}
+    var datamodels =
+    {{ datamodels | tojson }}
+    var tables =
+    {{ tables | tojson }}
 
     var pool = $('#pools')
     var datamodel = $('#datamodel')
@@ -61,51 +89,43 @@
 
         datamodel.empty();
         datamodel.append($('<option/>'));
-
+        $("#to_add_datamodel_name").after($('<input/>', {'type': 'hidden', 'value': pool.val(),'name':'selected_pool'}))
         var datamodels_sel = datamodels[pool.val()];
-        for (var i in datamodels_sel){
-            datamodel.append($('<option/>',{'value': datamodels_sel[i],'text':datamodels_sel[i]}))
-        };
+        for (var i in datamodels_sel) {
+            datamodel.append($('<option/>', {'value': datamodels_sel[i], 'text': datamodels_sel[i]}))
+        }
+        ;
     })
 
-    datamodel.change(function (){
+    datamodel.change(function () {
         table.empty();
         table.append($('<option/>'));
         var tables_sel = tables[datamodel.val()];
-        for (var i in tables_sel){
-            table.append($('<option/>',{'value': tables_sel[i],'text':tables_sel[i]}))
-        };
+        $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': pool.val(),'name':'selected_pool'}))
+        $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': datamodel.val(),'name':'selected_datamodel'}))
+        {#$('#to_add_table').after($('<input/>', {'type': 'text', 'value': datamodel.val(),'name':'selected_pool'}))#}
+
+        for (var i in tables_sel) {
+            table.append($('<option/>', {'value': tables_sel[i], 'text': tables_sel[i]}))
+        }
+        ;
     })
 
 </script>
 
 <script>
-    $('#add_datamodel').prop("disabled",true);
+    $('#add_datamodel_open').prop("disabled", true);
 
-    $('#add_pool').click(function (){
-
+    pool.change(function () {
+        $('#add_datamodel_open').prop("disabled", false);
     })
 
-    pool.change(function (){
-        $('#add_datamodel').prop("disabled",false);
-    })
+    $('#add_table_open').prop("disabled", true);
 
-    $('#add_table').prop("disabled",true);
-    datamodel.change(function (){
-        $('#add_table').prop("disabled",false);
+    datamodel.change(function () {
+        $('#add_table_open').prop("disabled", false);
     });
 
-
-    $("#add_pool").click(function() {
-        $("#myform #valueFromMyButton").text($(this).val().trim());
-        $("#myform input[type=text]").val('');
-        $("#valueFromMyModal").val('');
-        $("#myform").show();
-    });
-    $("#btnOK").click(function() {
-        $("#valueFromMyModal").val($("#myform input[type=text]").val().trim());
-        $("#myform").hide();
-    });
 </script>
 
 
