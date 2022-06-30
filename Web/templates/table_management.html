@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+    <title>Upload file</title>
+    <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" type="text/css">
+    <script src="{{ url_for('static',filename = 'jquery-3.6.0.min.js') }}"></script>
+</head>
+<body>
+
+<h1>Upload file</h1>
+<form method="POST" action="" enctype="multipart/form-data">
+    <p><input type="file" name="event_log" lang="en"></p>
+    <p><input type="submit" value="upload log"></p>
+</form>
+
+
+<select id='pools'>
+    <option style="display: none"></option>
+    {% for pool in pools %}
+    <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
+    {% endfor %}
+</select>
+
+
+<select id='datamodel'>
+</select>
+
+<select id="table">
+</select>
+
+
+
+<input type="button" id="add_pool" onclick="add_pool()" value="add pool" />
+<input type="button" id="add_datamodel" value="add datamodel"/>
+<input type="button" id="add_table" value="add table"/>
+
+<div class="dialog" id="myform">
+    <form>
+      <label id="valueFromMyButton">
+      </label>
+      <input type="text" id="name">
+      <div align="center">
+        <input type="button" value="Ok" id="btnOK">
+      </div>
+	</form>
+  </div>
+
+{#after selecting pool, datamodels selections show, enable add datamodel; after selecting datamodel, tables show selection show, enable add table#}
+<script>
+
+    var datamodels = {{ datamodels | tojson }}
+    var tables = {{ tables | tojson }}
+
+    var pool = $('#pools')
+    var datamodel = $('#datamodel')
+    var table = $('#table')
+
+
+    pool.change(function () {
+
+        datamodel.empty();
+        datamodel.append($('<option/>'));
+
+        var datamodels_sel = datamodels[pool.val()];
+        for (var i in datamodels_sel){
+            datamodel.append($('<option/>',{'value': datamodels_sel[i],'text':datamodels_sel[i]}))
+        };
+    })
+
+    datamodel.change(function (){
+        table.empty();
+        table.append($('<option/>'));
+        var tables_sel = tables[datamodel.val()];
+        for (var i in tables_sel){
+            table.append($('<option/>',{'value': tables_sel[i],'text':tables_sel[i]}))
+        };
+    })
+
+</script>
+
+<script>
+    $('#add_datamodel').prop("disabled",true);
+
+    $('#add_pool').click(function (){
+
+    })
+
+    pool.change(function (){
+        $('#add_datamodel').prop("disabled",false);
+    })
+
+    $('#add_table').prop("disabled",true);
+    datamodel.change(function (){
+        $('#add_table').prop("disabled",false);
+    });
+
+
+    $("#add_pool").click(function() {
+        $("#myform #valueFromMyButton").text($(this).val().trim());
+        $("#myform input[type=text]").val('');
+        $("#valueFromMyModal").val('');
+        $("#myform").show();
+    });
+    $("#btnOK").click(function() {
+        $("#valueFromMyModal").val($("#myform input[type=text]").val().trim());
+        $("#myform").hide();
+    });
+</script>
+
+
+</body>
+</html>
