@@ -15,28 +15,42 @@
 {#    <p><input type="submit" value="upload log"></p>#}
 {#</form>#}
 
+<div id="select_div" style="background-color: cornflowerblue">
+    <br>
 
-<select id='pools'>
-    <option style="display: none"></option>
-    {% for pool in pools %}
-        <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
-    {% endfor %}
-</select>
+    <h2>&nbsp; &nbsp;Table Selection</h2>
+
+    <br>
+    <select id='pools'>
+        <option style="display: none"></option>
+        {% for pool in pools %}
+            <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <button class="add_pool_open" id="add_pool_open">add pool</button>
+    <br>
+    <br>
+    <br>
+
+    <select id='datamodel'>
+    </select>
+    <br>
+    <button class="add_datamodel_open" id="add_datamodel_open">add datamodel</button>
+    <br>
+    <br>
+    <br>
+    <select id="table">
 
 
-<select id='datamodel'>
-</select>
-
-<select id="table">
-</select>
-
-<button class="add_pool_open" id="add_pool_open">add pool</button>
-<button class="add_datamodel_open" id="add_datamodel_open">add datamodel</button>
-<button class="add_table_open" id="add_table_open">add table</button>
+    </select>
+    <br>
+    <button class="add_table_open" id="add_table_open">add table</button>
+</div>
 
 
 <section id="add_pool">
-    <h2>Add Pool</h2>
+    <h3 style="color: darkred">Add Pool</h3>
     <form method="POST">
         <input type="text" name="add_pool" required>
         <input type="submit" value="add pool">
@@ -44,9 +58,9 @@
 </section>
 
 <section id="add_datamodel">
-    <h2>Add Datamodel</h2>
+    <h3>Add Datamodel</h3>
     <form method="POST">
-        <input type="text" name="add_datamodel" id="to_add_datamodel_name" required >
+        <input type="text" name="add_datamodel" id="to_add_datamodel_name" required>
         <input type="submit" value="add datamodel">
     </form>
 </section>
@@ -55,7 +69,7 @@
     <h2>Add Table</h2>
     <form method="POST" enctype=multipart/form-data>
         <input type="file" name="add_table" id="to_add_table" required accept=".xes">
-        <input type="submit"  value="add table">
+        <input type="submit" value="add table">
     </form>
 </section>
 
@@ -89,7 +103,11 @@
 
         datamodel.empty();
         datamodel.append($('<option/>'));
-        $("#to_add_datamodel_name").after($('<input/>', {'type': 'hidden', 'value': pool.val(),'name':'selected_pool'}))
+        $("#to_add_datamodel_name").after($('<input/>', {
+            'type': 'hidden',
+            'value': pool.val(),
+            'name': 'selected_pool'
+        }))
         var datamodels_sel = datamodels[pool.val()];
         for (var i in datamodels_sel) {
             datamodel.append($('<option/>', {'value': datamodels_sel[i], 'text': datamodels_sel[i]}))
@@ -101,8 +119,12 @@
         table.empty();
         table.append($('<option/>'));
         var tables_sel = tables[datamodel.val()];
-        $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': pool.val(),'name':'selected_pool'}))
-        $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': datamodel.val(),'name':'selected_datamodel'}))
+        $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': pool.val(), 'name': 'selected_pool'}))
+        $('#to_add_table').after($('<input/>', {
+            'type': 'hidden',
+            'value': datamodel.val(),
+            'name': 'selected_datamodel'
+        }))
         {#$('#to_add_table').after($('<input/>', {'type': 'text', 'value': datamodel.val(),'name':'selected_pool'}))#}
 
         for (var i in tables_sel) {
@@ -128,6 +150,32 @@
 
 </script>
 
+
+<script>
+
+    $(function () {
+        $('#select_div').offset({
+            left: 0,
+            top: 0
+        })
+        $('#select_div').width(200)
+        $('#select_div').height(10000)
+
+        $('select').css('margin', '20')
+        $('select').width(150)
+        $('select').height(20)
+        $('select').offset({
+            left: 15
+        })
+        $('button').offset({
+            left: 30
+        })
+        $('button').width(100)
+        console.log($('#select_div').height())
+
+
+    })
+</script>
 
 </body>
 </html>
