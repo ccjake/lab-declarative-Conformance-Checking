@@ -6,7 +6,7 @@ from werkzeug.utils import secure_filename
 
 from pm4py.objects.log.importer.xes import importer as xes_importer
 from pm4py import convert_to_dataframe
-
+from discovery.model_discover import declare_model_discover
 
 app = Flask(__name__)
 
@@ -72,11 +72,159 @@ def select():
     return render_template("select_func.html")
 
 
+def data_handel(request):
+    global cn
+    global pools
+    global datamodels
+    global tables
+
+    if "add_pool" in request.form:
+        try:
+            pool_name = str(request.form.get("add_pool"))
+            print("request.values", request.values)
+            print("request.form", request.form)
+
+            print(pool_name)
+            cn.c.create_pool(pool_name)
+            pools = [pool.name for pool in cn.get_pools()]
+            return render_template(
+                "discover.html",
+                pools=pools,
+                datamodels=datamodels,
+                tables=tables,
+            )
+        except:
+            return render_template(
+                "discover.html",
+                pools=pools,
+                datamodels=datamodels,
+                tables=tables,
+                error="pool already exists",
+            )
+
+    ## add datamodel
+    if "add_datamodel" in request.form:
+        try:
+            pool_name = str(request.form.get("selected_pool"))
+            datamodel_name = str(request.form.get("add_datamodel"))
+            cn.c.create_datamodel(datamodel_name, pool_name)
+            datamodels = {
+                pool.name: [datamodel.name for datamodel in pool.datamodels]
+                for pool in cn.get_pools()
+            }
+            return render_template(
+                "discover.html",
+                pools=pools,
+                datamodels=datamodels,
+                tables=tables,
+            )
+        except:
+            return render_template(
+                "discover.html",
+                pools=pools,
+                datamodels=datamodels,
+                tables=tables,
+                error="datamodel already exists",
+            )
+
+    ## add table
+    if "add_table" in request.files:
+        try:
+            pool_name = str(request.form.get("selected_pool"))
+            datamodel_name = str(request.form.get("selected_datamodel"))
+            table = request.files["add_table"]
+            if table:
+                tablename = secure_filename(table.filename)
+                file_path = os.path.join(app.config["UPLOAD_FOLDER"], tablename)
+                # set the file path
+                table.save(file_path)
+                log_path = join(dirname(realpath(__file__)), file_path)
+                log = xes_importer.apply(log_path)
+                df_act = convert_to_dataframe(log)
+                df_act.rename(columns={"case:concept:name": "CASE ID"}, inplace=True)
+                colnames = df_act.columns
+                pool = cn.get_pools().find(pool_name)
+                datamodel = cn.get_datamodels().find(datamodel_name)
+                pool.create_table(df_act, tablename)
+                tablename = tablename.replace(".", "_")
+                datamodel.add_table_from_pool(table_name=tablename)
+                for colname in colnames:
+                    if "CASE" in colname:
+                        case_col = colname
+                        continue
+                    if "time" in colname:
+                        time_col = colname
+                        continue
+                    if "concept:name" in colname:
+                        act_col = colname
+                        continue
+                datamodel.create_process_configuration(
+                    activity_table=tablename,
+                    case_column=case_col,
+                    activity_column=act_col,
+                    timestamp_column=time_col,
+                )
+                datamodel.reload()
+                tables = {
+                    datamodel.name: [table.name for table in datamodel.tables]
+                    for datamodel in cn.get_datamodels()
+                }
+            return render_template(
+                "discover.html",
+                pools=pools,
+                datamodels=datamodels,
+                tables=tables,
+            )
+        except:
+            print("except")
+            return render_template(
+                "discover.html",
+                pools=pools,
+                datamodels=datamodels,
+                tables=tables,
+                error="table already exists",
+            )
+
+
 # manage the pools, datamodels and tables;
-@app.route("/table_manager", methods=["GET", "POST"])
-def table_management():
+@app.route("/discover", methods=["GET", "POST"])
+def discover():
     # get the uploaded file
     error = None
+    model = {
+        "equivalence": [
+            ("ER_Registration", "ER_Triage"),
+            ("ER_Registration", "IV_Antibiotics"),
+            ("ER_Triage", "ER_Registration"),
+            ("ER_Triage", "IV_Antibiotics"),
+            ("IV_Antibiotics", "ER_Registration"),
+            ("IV_Antibiotics", "ER_Triage"),
+        ],
+        "always_after": [
+            ("ER_Registration", "ER_Sepsis_Triage"),
+            ("ER_Registration", "ER_Triage"),
+            ("ER_Registration", "IV_Antibiotics"),
+            ("ER_Triage", "ER_Sepsis_Triage"),
+            ("IV_Antibiotics", "ER_Sepsis_Triage"),
+            ("IV_Antibiotics", "ER_Triage"),
+        ],
+        "always_before": [
+            ("ER_Triage", "ER_Registration"),
+            ("ER_Triage", "IV_Antibiotics"),
+            ("IV_Antibiotics", "ER_Registration"),
+        ],
+        "never_together": [],
+        "directly_follows": [
+            ("ER_Registration", "IV_Antibiotics"),
+            ("ER_Triage", "ER_Sepsis_Triage"),
+        ],
+        "activ_freq": {
+            "ER_Registration": {1},
+            "ER_Sepsis_Triage": {5, 6},
+            "ER_Triage": {1},
+            "IV_Antibiotics": {1},
+        },
+    }
     if request.method == "POST":
         global cn
         global pools
@@ -84,119 +232,78 @@ def table_management():
         global tables
 
         ## add pool
-        if "add_pool" in request.form:
-            try:
-                pool_name = str(request.form.get("add_pool"))
-                print("request.values", request.values)
-                print("request.form", request.form)
+        data_handel(request)
 
-                print(pool_name)
-                cn.c.create_pool(pool_name)
-                pools = [pool.name for pool in cn.get_pools()]
-                return render_template(
-                    "table_management.html",
-                    pools=pools,
-                    datamodels=datamodels,
-                    tables=tables,
+        ## model discover
+        if "table_discover" in request.form:
+            # table = request.form["table_discover"]
+            # datamodel_name = request.form["datamodel_discover"]
+            # datamodel = cn.c.datamodels.find(datamodel_name)
+            # threshold = int(request.form["threshold"])
+            # model = declare_model_discover(datamodel, table, (1 - threshold))
+            text_model = {}
+            text_model["EquivalenceM"] = [
+                (
+                    "Activity '"
+                    + a
+                    + "' and activity '"
+                    + b
+                    + "' always occur with same frequency into a trace"
                 )
-            except:
-                return render_template(
-                    "table_management.html",
-                    pools=pools,
-                    datamodels=datamodels,
-                    tables=tables,
-                    error="pool already exists",
-                )
+                for (a, b) in model["equivalence"]
+            ]
+            text_model["Always-afterM"] = [
+                ("Activity '"
+                + a
+                + "' is alywas followed by '"
+                + b
+                + "' ")
+                for (a, b) in model["always_after"]
+            ]
+            text_model["Always-beforeM"] = [
+                ("Activity '"
+                + a
+                + "' is alywas preceded by '"
+                + b
+                + "' ")
+                for (a, b) in model["always_before"]
+            ]
+            text_model["Never-togetherM"] = [
+                ("Activity '"
+                 + a
+                 + "' and activity '"
+                 + b
+                 + "' never occur in a same trace")
+                for (a, b) in model["never_together"]
+            ]
+            text_model["Directly-followsM"] = [
+                ("Activity '"
+                + a
+                + "' is alywas directly followed by '"
+                + b
+                + "' ")
+                for (a, b) in model["directly_follows"]
+            ]
 
+            for _ in model['activ_freq'].keys():
+                model['activ_freq'][_] = "[" + ", ".join(map(str, model['activ_freq'][_])) + "]"
 
-        ## add datamodel
-        if "add_datamodel" in request.form:
-            try:
-                pool_name = str(request.form.get("selected_pool"))
-                datamodel_name = str(request.form.get("add_datamodel"))
-                cn.c.create_datamodel(datamodel_name, pool_name)
-                datamodels = {
-                    pool.name: [datamodel.name for datamodel in pool.datamodels]
-                    for pool in cn.get_pools()
-                }
-                return render_template(
-                    "table_management.html",
-                    pools=pools,
-                    datamodels=datamodels,
-                    tables=tables,
-                )
-            except:
-                return render_template(
-                    "table_management.html",
-                    pools=pools,
-                    datamodels=datamodels,
-                    tables=tables,
-                    error="datamodel already exists",
-                )
+            text_model['OccurrencesM'] = [
+                ("Activity '" + a + "' can happen " + model['activ_freq'][a] + " times in one trace")
+                for a in model['activ_freq'].keys()
+            ]
+            print(text_model)
 
-
-        ## add table
-        if "add_table" in request.files:
-            try:
-                pool_name = str(request.form.get("selected_pool"))
-                datamodel_name = str(request.form.get("selected_datamodel"))
-                table = request.files["add_table"]
-                if table:
-                    tablename = secure_filename(table.filename)
-                    file_path = os.path.join(app.config["UPLOAD_FOLDER"], tablename)
-                    # set the file path
-                    table.save(file_path)
-                    log_path = join(dirname(realpath(__file__)), file_path)
-                    log = xes_importer.apply(log_path)
-                    df_act = convert_to_dataframe(log)
-                    df_act.rename(
-                        columns={"case:concept:name": "CASE ID"}, inplace=True
-                    )
-                    colnames = df_act.columns
-                    pool = cn.get_pools().find(pool_name)
-                    datamodel = cn.get_datamodels().find(datamodel_name)
-                    pool.create_table(df_act, tablename)
-                    tablename = tablename.replace(".", "_")
-                    datamodel.add_table_from_pool(table_name=tablename)
-                    for colname in colnames:
-                        if "CASE" in colname:
-                            case_col = colname
-                            continue
-                        if "time" in colname:
-                            time_col = colname
-                            continue
-                        if "concept:name" in colname:
-                            act_col = colname
-                            continue
-                    datamodel.create_process_configuration(
-                        activity_table=tablename,
-                        case_column=case_col,
-                        activity_column=act_col,
-                        timestamp_column=time_col,
-                    )
-                    datamodel.reload()
-                    tables = {
-                        datamodel.name: [table.name for table in datamodel.tables]
-                        for datamodel in cn.get_datamodels()
-                    }
-                return render_template(
-                    "table_management.html",
-                    pools=pools,
-                    datamodels=datamodels,
-                    tables=tables,
-                )
-            except:
-                print("except")
-                return render_template(
-                    "table_management.html",
-                    pools=pools,
-                    datamodels=datamodels,
-                    tables=tables,
-                    error="table already exists",
-                )
-
+            # print(declare_model_discover(datamodel, table, (1 - threshold)))
+            return render_template(
+                "discover.html",
+                pools=pools,
+                datamodels=datamodels,
+                tables=tables,
+                text_model=text_model,
+            )
     return render_template(
-        "table_management.html", pools=pools, datamodels=datamodels, tables=tables
+        "discover.html", pools=pools, datamodels=datamodels, tables=tables,text_model = model
     )
 
 

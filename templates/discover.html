@@ -1,10 +1,268 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Model Discover</title>
+    <title>Upload file</title>
+    <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
+    <script src="../static/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
+    <link type="text/css" href="../static/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+    <script type="text/javascript" src="../static/jquery.jscrollpane.min.js"></script>
+    <script type="text/javascript" src="../static/jquery.mousewheel.js"></script>
 </head>
 <body>
+<div>
+    <div id="select_div" style="background-color: darkturquoise">
+        <br>
+
+        <h2>&nbsp; &nbsp;Model Discover</h2>
+
+        <br>
+        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pool</h4>
+        <select id='pools'>
+            <option style="display: none"></option>
+            {% for pool in pools %}
+                <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button class="add_pool_open" id="add_pool_open">add pool</button>
+        <br>
+        <br>
+        <br>
+        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Datamodel</h4>
+        <select id='datamodel'>
+        </select>
+        <br>
+        <button class="add_datamodel_open" id="add_datamodel_open">add datamodel</button>
+        <br>
+        <br>
+        <br>
+        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Table</h4>
+        <select id="table">
+        </select>
+        <br>
+        <button class="add_table_open" id="add_table_open">add table</button>
+
+        <br>
+        <br>
+        <br>
+        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Threshold</h4>
+        <form method="POST">
+            <input type="range" id="threshold" name="threshold" min='0' max='1' step='0.01' value="1">
+            <input type="submit" value="Discover" class="bigSub" id="discover" disabled>
+        </form>
+
+    </div>
+    <div id="button_div"; position: absolute>
+        <button class="rule_button" id='Equivalence'>Equivalence</button>
+        <br>
+        <button class="rule_button" id='Always-after'>Always-after</button>
+        <br>
+        <button class="rule_button" id='Always-before'>Always-before</button>
+        <br>
+        <button class="rule_button" id='Never-together'>Never-together</button>
+        <br>
+        <button class="rule_button" id='Directly-follows'>Directly-follows</button>
+        <br>
+        <button class="rule_button" id='Occurrences'>Occurrences</button>
+        <br>
+        <button class="rule_button" id='all'>All</button>
+    </div>
+    <div id="model_div" class="model_div">
+        {% if text_model %}
+            {% for k in text_model.keys() %}
+                <div id = {{ k }} class='rule_div'>
+                {% for text in text_model[k] %}
+                    <p>{{ text }}</p>
+                {% endfor %}
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+</div>
+<section id="add_pool" class>
+    <h3>Add Pool</h3>
+    <form method="POST">
+        <input type="text" name="add_pool" required>
+        <input type="submit" value="add pool">
+    </form>
+</section>
+
+<section id="add_datamodel">
+    <h3>Add Datamodel</h3>
+    <form method="POST">
+        <input type="text" name="add_datamodel" id="to_add_datamodel_name" required>
+        <input type="submit" value="add datamodel">
+    </form>
+</section>
+
+<section id="add_table">
+    <h2>Add Table</h2>
+    <form method="POST" enctype=multipart/form-data>
+        <input type="file" name="add_table" id="to_add_table" required accept=".xes">
+        <input type="submit" value="add table">
+    </form>
+</section>
+
+
+<script>
+    $('#add_pool').popup();
+    $('#add_datamodel').popup();
+    $('#add_table').popup();
+</script>
+
+{% if error %}
+    <script>
+        $(function () {
+            $(alert("{{ error }}"))
+        })
+    </script>
+{% endif %}
+{#after selecting pool, datamodels selections show, enable add datamodel; after selecting datamodel, tables show selection show, enable add table#}
+<script>
+    var datamodels =
+    {{ datamodels | tojson }}
+    var tables =
+    {{ tables | tojson }}
+
+    var pool = $('#pools')
+    var datamodel = $('#datamodel')
+    var table = $('#table')
+
+
+    pool.change(function () {
+
+        datamodel.empty();
+        datamodel.append($('<option/>'));
+        $("#to_add_datamodel_name").after($('<input/>', {
+            'type': 'hidden',
+            'value': pool.val(),
+            'name': 'selected_pool'
+        }))
+        var datamodels_sel = datamodels[pool.val()];
+        for (var i in datamodels_sel) {
+            datamodel.append($('<option/>', {'value': datamodels_sel[i], 'text': datamodels_sel[i]}))
+        }
+        ;
+    })
+
+    datamodel.change(function () {
+        table.empty();
+        table.append($('<option/>'));
+        var tables_sel = tables[datamodel.val()];
+        $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': pool.val(), 'name': 'selected_pool'}))
+        $('#to_add_table').after($('<input/>', {
+            'type': 'hidden',
+            'value': datamodel.val(),
+            'name': 'selected_datamodel'
+        }))
+
+        for (var i in tables_sel) {
+            table.append($('<option/>', {'value': tables_sel[i], 'text': tables_sel[i]}))
+        }
+        ;
+
+    })
+
+    table.change(function () {
+        $("#discover").before($('<input/>', {'type': 'hidden', 'value': table.val(), 'name': 'table_discover'}))
+        $("#discover").before($('<input/>', {'type': 'hidden', 'value': datamodel.val(), 'name': 'datamodel_discover'}))
+        $("#discover").prop("disabled", false)
+    })
+
+</script>
+
+<script>
+    $('#add_datamodel_open').prop("disabled", true);
+
+    pool.change(function () {
+        $('#add_datamodel_open').prop("disabled", false);
+    })
+
+    $('#add_table_open').prop("disabled", true);
+
+    datamodel.change(function () {
+        $('#add_table_open').prop("disabled", false);
+    });
+
+</script>
+
+
+<script>
+
+    $(function () {
+        $('#select_div').offset({
+            left: 0,
+            top: 0
+        })
+        $('#select_div').width(200)
+        $('#select_div').height($(window).height())
+        $("#model_div").height($(window).height())
+        $('body').css('height','100')
+
+
+        $('select').css('margin', '20')
+        $('select').width(150)
+        $('select').height(20)
+        $('select').offset({
+            left: 15
+        })
+        $('button').offset({
+            left: 30
+        })
+        $('button').width(100)
+
+        $('#discover').offset({
+            left: 36,
+            top: 550
+        })
+
+        $('#threshold').offset({
+            left: 20
+        })
+        $("#model_div").offset({
+            top: 40,
+            left: 400
+        })
+
+
+
+        $("#button_div").offset({
+            left: 200,
+            top: 25
+        })
+        $("#button_div").width(180)
+        {#$("#button_div").height(9999)#}
+        $('.rule_button').offset({
+            left: 220
+        })
+
+
+
+        $("#model_div").jScrollPane();
+
+        $('.rule_button').click(function () {
+
+            $(this).css('background', 'red')
+            $(this).siblings(".rule_button").css('background', 'lightgreen')
+            {#$('#'.concat($(this).attr('id'),'M')).css('display','inline')#}
+            {#$('#model_div').empty()#}
+            console.log($("#".concat($(this).attr('id'), 'M')).attr('id'))
+            $()
+            $('.rule_div').hide()
+            $("#"+$(this).attr('id')+"M").show()
+            {#$('#Never-togetherM').show()#}
+            console.log("nmd")
+        })
+
+        $('#Equivalence').click()
+
+        $('#all').click(function (){
+            $('.rule_div').show()
+        })
+    })
+</script>
 
 </body>
 </html>

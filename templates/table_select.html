@@ -1,0 +1,181 @@
+<!doctype html>
+<html>
+<head>
+    <title>Upload file</title>
+    <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
+    <script src="../static/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
+    <link rel="stylesheet" href="../static/style.css">
+</head>
+<body>
+
+{#<h1>Upload file</h1>#}
+{#<form method="POST" action="" enctype="multipart/form-data">#}
+{#    <p><input type="file" name="event_log" lang="en"></p>#}
+{#    <p><input type="submit" value="upload log"></p>#}
+{#</form>#}
+
+<div id="select_div" style="background-color: cornflowerblue">
+    <br>
+
+    <h2>&nbsp; &nbsp;Table Selection</h2>
+
+    <br>
+    <select id='pools'>
+        <option style="display: none"></option>
+        {% for pool in pools %}
+            <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
+        {% endfor %}
+    </select>
+    <br>
+    <button class="add_pool_open" id="add_pool_open">add pool</button>
+    <br>
+    <br>
+    <br>
+
+    <select id='datamodel'>
+    </select>
+    <br>
+    <button class="add_datamodel_open" id="add_datamodel_open">add datamodel</button>
+    <br>
+    <br>
+    <br>
+    <select id="table">
+
+
+    </select>
+    <br>
+    <button class="add_table_open" id="add_table_open">add table</button>
+</div>
+
+
+<section id="add_pool">
+    <h3 style="color: darkred">Add Pool</h3>
+    <form method="POST">
+        <input type="text" name="add_pool" required>
+        <input type="submit" value="add pool">
+    </form>
+</section>
+
+<section id="add_datamodel">
+    <h3>Add Datamodel</h3>
+    <form method="POST">
+        <input type="text" name="add_datamodel" id="to_add_datamodel_name" required>
+        <input type="submit" value="add datamodel">
+    </form>
+</section>
+
+<section id="add_table">
+    <h2>Add Table</h2>
+    <form method="POST" enctype=multipart/form-data>
+        <input type="file" name="add_table" id="to_add_table" required accept=".xes">
+        <input type="submit" value="add table">
+    </form>
+</section>
+
+
+<script>
+    $('#add_pool').popup();
+    $('#add_datamodel').popup();
+    $('#add_table').popup();
+</script>
+
+{% if error %}
+    <script>
+        $(function () {
+            $(alert("{{ error }}"))
+        })
+    </script>
+{% endif %}
+{#after selecting pool, datamodels selections show, enable add datamodel; after selecting datamodel, tables show selection show, enable add table#}
+<script>
+    var datamodels =
+    {{ datamodels | tojson }}
+    var tables =
+    {{ tables | tojson }}
+
+    var pool = $('#pools')
+    var datamodel = $('#datamodel')
+    var table = $('#table')
+
+
+    pool.change(function () {
+
+        datamodel.empty();
+        datamodel.append($('<option/>'));
+        $("#to_add_datamodel_name").after($('<input/>', {
+            'type': 'hidden',
+            'value': pool.val(),
+            'name': 'selected_pool'
+        }))
+        var datamodels_sel = datamodels[pool.val()];
+        for (var i in datamodels_sel) {
+            datamodel.append($('<option/>', {'value': datamodels_sel[i], 'text': datamodels_sel[i]}))
+        }
+        ;
+    })
+
+    datamodel.change(function () {
+        table.empty();
+        table.append($('<option/>'));
+        var tables_sel = tables[datamodel.val()];
+        $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': pool.val(), 'name': 'selected_pool'}))
+        $('#to_add_table').after($('<input/>', {
+            'type': 'hidden',
+            'value': datamodel.val(),
+            'name': 'selected_datamodel'
+        }))
+        {#$('#to_add_table').after($('<input/>', {'type': 'text', 'value': datamodel.val(),'name':'selected_pool'}))#}
+
+        for (var i in tables_sel) {
+            table.append($('<option/>', {'value': tables_sel[i], 'text': tables_sel[i]}))
+        }
+        ;
+    })
+
+</script>
+
+<script>
+    $('#add_datamodel_open').prop("disabled", true);
+
+    pool.change(function () {
+        $('#add_datamodel_open').prop("disabled", false);
+    })
+
+    $('#add_table_open').prop("disabled", true);
+
+    datamodel.change(function () {
+        $('#add_table_open').prop("disabled", false);
+    });
+
+</script>
+
+
+<script>
+
+    $(function () {
+        $('#select_div').offset({
+            left: 0,
+            top: 0
+        })
+        $('#select_div').width(200)
+        $('#select_div').height(10000)
+
+        $('select').css('margin', '20')
+        $('select').width(150)
+        $('select').height(20)
+        $('select').offset({
+            left: 15
+        })
+        $('button').offset({
+            left: 30
+        })
+        $('button').width(100)
+        console.log($('#select_div').height())
+
+
+    })
+</script>
+
+</body>
+</html>
