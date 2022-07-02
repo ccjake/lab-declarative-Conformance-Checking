@@ -3,84 +3,98 @@
 <head>
     <title>Upload file</title>
     <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
-    <script src="../static/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="../static/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
-    <link rel="stylesheet" href="../static/style.css">
-    <link type="text/css" href="../static/jquery.jscrollpane.css" rel="stylesheet" media="all" />
+    <link rel="stylesheet" href="../static/discover_style.css">
+
+    <link type="text/css" href="../static/jquery.jscrollpane.css" rel="stylesheet" media="all"/>
     <script type="text/javascript" src="../static/jquery.jscrollpane.min.js"></script>
     <script type="text/javascript" src="../static/jquery.mousewheel.js"></script>
+
 </head>
 <body>
-<div>
-    <div id="select_div" style="background-color: darkturquoise">
-        <br>
+<div id="select_div" style="background-color: darkturquoise">
+    <br>
+    <h2>&nbsp; &nbsp;Model Discover</h2>
 
-        <h2>&nbsp; &nbsp;Model Discover</h2>
+    <br>
+    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pool</h4>
+    <select id='pools'>
+        <option style="display: none"></option>
+        {% for pool in pools %}
+            <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
+        {% endfor %}
+    </select>
+    <button  class="add_data add_pool_open" id="add_pool_open">add pool</button>
+    <br>
+    <br>
+    <br>
+    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Datamodel</h4>
+    <select id='datamodel'>
+    </select>
+    <br>
+    <button class="add_data add_datamodel_open" id="add_datamodel_open">add datamodel</button>
+    <br>
+    <br>
+    <br>
+    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Table</h4>
+    <select id="table">
+    </select>
+    <br>
+    <button class="add_data add_table_open" id="add_table_open">add table</button>
 
-        <br>
-        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pool</h4>
-        <select id='pools'>
-            <option style="display: none"></option>
-            {% for pool in pools %}
-                <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <button class="add_pool_open" id="add_pool_open">add pool</button>
-        <br>
-        <br>
-        <br>
-        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Datamodel</h4>
-        <select id='datamodel'>
-        </select>
-        <br>
-        <button class="add_datamodel_open" id="add_datamodel_open">add datamodel</button>
-        <br>
-        <br>
-        <br>
-        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Table</h4>
-        <select id="table">
-        </select>
-        <br>
-        <button class="add_table_open" id="add_table_open">add table</button>
+    <br>
+    <br>
+    <br>
+    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Threshold</h4>
+    <form method="POST" >
+        <input type="range" id="threshold"  name="threshold" min='0' max='1' step='0.01' value="1"><br>
+        <input type="submit" value="Discover" class="bigSub" id="discover" disabled>
+    </form>
 
-        <br>
-        <br>
-        <br>
-        <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Threshold</h4>
-        <form method="POST">
-            <input type="range" id="threshold" name="threshold" min='0' max='1' step='0.01' value="1">
-            <input type="submit" value="Discover" class="bigSub" id="discover" disabled>
-        </form>
+</div>
+<div id="button_div" ; style="position: absolute;left: 200px;">
+    <button class="rule_button" id='Equivalence'>Equivalence</button>
+    <br>
+    <button class="rule_button" id='Always-after'>Always-after</button>
+    <br>
+    <button class="rule_button" id='Always-before'>Always-before</button>
+    <br>
+    <button class="rule_button" id='Never-together'>Never-together</button>
+    <br>
+    <button class="rule_button" id='Directly-follows'>Directly-follows</button>
+    <br>
+    <button class="rule_button" id='Occurrences'>Occurrences</button>
+    <br>
+    <button class="rule_button" id='all'>All</button>
+</div>
 
-    </div>
-    <div id="button_div"; position: absolute>
-        <button class="rule_button" id='Equivalence'>Equivalence</button>
-        <br>
-        <button class="rule_button" id='Always-after'>Always-after</button>
-        <br>
-        <button class="rule_button" id='Always-before'>Always-before</button>
-        <br>
-        <button class="rule_button" id='Never-together'>Never-together</button>
-        <br>
-        <button class="rule_button" id='Directly-follows'>Directly-follows</button>
-        <br>
-        <button class="rule_button" id='Occurrences'>Occurrences</button>
-        <br>
-        <button class="rule_button" id='all'>All</button>
-    </div>
-    <div id="model_div" class="model_div">
-        {% if text_model %}
-            {% for k in text_model.keys() %}
-                <div id = {{ k }} class='rule_div'>
+<div id="model_div" class="model_div" style="position: absolute;">
+    {% if text_model %}
+        {% for k in text_model.keys() %}
+            <div id={{ k }} class='rule_div'>
                 {% for text in text_model[k] %}
                     <p>{{ text }}</p>
                 {% endfor %}
-                </div>
-            {% endfor %}
-        {% endif %}
-    </div>
+            </div>
+        {% endfor %}
+    {% endif %}
 </div>
+
+
+<!--discover button-->
+<div id="conformance_button">
+        <span class="select">
+            <a href="{{ url_for( 'discover' ) }}" class="select_url">
+                    <img src="{{ url_for('static',filename = '/images/conformance.png') }}" width="120px">
+                <br>
+            </a>
+            <label><strong>Conformance Checking</strong></label>
+            </span>
+</div>
+
+
+<!--the add buttons for selec pool-->
 <section id="add_pool" class>
     <h3>Add Pool</h3>
     <form method="POST">
@@ -105,12 +119,12 @@
     </form>
 </section>
 
-
 <script>
     $('#add_pool').popup();
     $('#add_datamodel').popup();
     $('#add_table').popup();
 </script>
+
 
 {% if error %}
     <script>
@@ -192,75 +206,51 @@
 <script>
 
     $(function () {
-        $('#select_div').offset({
-            left: 0,
-            top: 0
-        })
-        $('#select_div').width(200)
-        $('#select_div').height($(window).height())
+
+        {#$('#select_div').height($(window).height())#}
+
         $("#model_div").height($(window).height())
-        $('body').css('height','100')
+        $('body').height($(window).height())
 
 
-        $('select').css('margin', '20')
-        $('select').width(150)
-        $('select').height(20)
-        $('select').offset({
-            left: 15
-        })
-        $('button').offset({
-            left: 30
-        })
-        $('button').width(100)
 
-        $('#discover').offset({
-            left: 36,
-            top: 550
-        })
+        $('.add_data').width(100)
+
+
 
         $('#threshold').offset({
             left: 20
         })
+        $("#model_div").jScrollPane();
         $("#model_div").offset({
             top: 40,
             left: 400
         })
 
 
-
-        $("#button_div").offset({
-            left: 200,
-            top: 25
-        })
         $("#button_div").width(180)
-        {#$("#button_div").height(9999)#}
-        $('.rule_button').offset({
-            left: 220
-        })
 
-
-
-        $("#model_div").jScrollPane();
 
         $('.rule_button').click(function () {
-
+            console.log("---")
             $(this).css('background', 'red')
             $(this).siblings(".rule_button").css('background', 'lightgreen')
-            {#$('#'.concat($(this).attr('id'),'M')).css('display','inline')#}
-            {#$('#model_div').empty()#}
-            console.log($("#".concat($(this).attr('id'), 'M')).attr('id'))
-            $()
+            {#console.log($("#".concat($(this).attr('id'), 'M')).attr('id'))#}
             $('.rule_div').hide()
-            $("#"+$(this).attr('id')+"M").show()
+            $("#" + $(this).attr('id') + "M").show()
             {#$('#Never-togetherM').show()#}
-            console.log("nmd")
+            {#console.log("nmd")#}
         })
 
         $('#Equivalence').click()
 
-        $('#all').click(function (){
+
+        $('#all').click(function () {
             $('.rule_div').show()
         })
+
+
+
     })
 </script>
 

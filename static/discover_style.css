@@ -4,7 +4,7 @@ body {
     font-size: 15px;
     font-family: Helvetica, Arial, sans-serif;
     /*border: 1px solid black;*/
-    /*overflow-y: hidden;*/
+    overflow-y: hidden;
 }
 
 
@@ -34,6 +34,8 @@ body {
 
 #select_div{
     position: absolute;
+    width: 200px;
+    height: 10000px;
 }
 
 .select_url{
@@ -69,10 +71,13 @@ body {
 
 .bigSub{
     /*offset: 10px 80px;*/
-    background-color: slateblue;
-    height: 50px;
-    width: 100px;
-    border: 2px red;
+    background-color: slategrey;
+    height: 100px;
+    width: 150px;
+    position: relative;
+    top: 50px;
+    left: 20px;
+    border: 5px solid red;
 }
 
 
@@ -85,34 +90,46 @@ h4{
     margin: 0px;
 }
 
-.rule_button{
-    display:block;
-    position: relative;
-    /*margin-top: 30px;*/
-    padding: 30px;
-    height: 40px;
-    width: 200px;
-    float: top;
-    border: 0px;
-    background-color: lightgreen;
-}
+
 
 .model_div{
     height: 800px;
     width: 800px;
+    position: absolute;
+    left: 400px;
     overflow: auto;
 }
 
 select{
-    margin: 20px;
+    margin: 5px;
     width: 150px;
-    height: 20px;
-    position: absolute;
+    height: 10px;
+    position: relative;
     left:15px;
 
 }
 .rule_button{
-    position: absolute;
-    left:250px;
-    width: 100px;
+    /*display: inline-block;*/
+    /*vertical-align:middle;*/
+    /*text-align: center;*/
+    margin: 10px;
+    position: relative;
+    left: 0px;
+    padding: 10px;
+    width: 150px;
+    height: 60px;
+    background-color: lightgreen;
+    border: 1px solid red;
+}
+
+.add_data{
+    position: relative;
+    top: 5px;
+    left: 20px;
+
+}
+
+#conformance_button{
+    position: relative;
+    top: -40px;
 }
