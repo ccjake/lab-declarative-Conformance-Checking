@@ -5,7 +5,7 @@
     <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
     <script type="text/javascript" src="../static/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
-    <link rel="stylesheet" href="../static/discover_style.css">
+    <link rel="stylesheet" href="../static/conformance_style.css">
 
     <link type="text/css" href="../static/jquery.jscrollpane.css" rel="stylesheet" media="all"/>
     <script type="text/javascript" src="../static/jquery.jscrollpane.min.js"></script>
@@ -15,7 +15,7 @@
 <body>
 <div id="select_div" style="background-color: darkturquoise">
     <br>
-    <h2>&nbsp;&nbsp;Model Discover<br> &nbsp;</h2>
+    <h2>&nbsp;&nbsp;Conformance<br> &nbsp;&nbsp;Checking</h2>
 
     <br>
     <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Pool</h4>
@@ -25,7 +25,7 @@
             <option value="{{ pool }}" onselect="gradeChange()">{{ pool }}</option>
         {% endfor %}
     </select>
-    <button  class="add_data add_pool_open" id="add_pool_open">add pool</button>
+    <button class="add_data add_pool_open" id="add_pool_open">add pool</button>
     <br>
     <br>
     <br>
@@ -46,50 +46,22 @@
     <br>
     <br>
     <br>
-    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Threshold</h4>
-    <form method="POST" >
-        <input type="range" id="threshold"  name="threshold" min='0' max='1' step='0.01' value="1"><br>
-        <input type="submit" value="Discover" class="bigSub" id="discover" disabled>
+    <br>
+    <form method="POST">
+        <input type="submit" value="Conformance Check" class="bigSub" id="discover" disabled>
     </form>
 
-</div>
-<div id="button_div" ; style="position: absolute;left: 200px;">
-    <button class="rule_button" id='Equivalence'>Equivalence</button>
-    <br>
-    <button class="rule_button" id='Always-after'>Always-after</button>
-    <br>
-    <button class="rule_button" id='Always-before'>Always-before</button>
-    <br>
-    <button class="rule_button" id='Never-together'>Never-together</button>
-    <br>
-    <button class="rule_button" id='Directly-follows'>Directly-follows</button>
-    <br>
-    <button class="rule_button" id='Occurrences'>Occurrences</button>
-    <br>
-    <button class="rule_button" id='all'>All</button>
-</div>
-
-<div id="model_div" class="model_div" style="position: absolute;">
-    {% if text_model %}
-        {% for k in text_model.keys() %}
-            <div id={{ k }} class='rule_div'>
-                {% for text in text_model[k] %}
-                    <p>{{ text }}</p>
-                {% endfor %}
-            </div>
-        {% endfor %}
-    {% endif %}
 </div>
 
 
 <!--discover button-->
 <div id="conformance_button">
         <span class="select">
-            <a href="{{ url_for( 'conformance' ) }}" class="select_url">
-                    <img src="{{ url_for('static',filename = '/images/conformance.png') }}" width="120px">
+            <a href="{{ url_for( 'discover' ) }}" class="select_url">
+                    <img src="{{ url_for('static',filename = '/images/discover.png') }}" width="120px">
                 <br>
             </a>
-            <label><strong>Conformance Checking</strong></label>
+            <label><strong>Model Discover</strong></label>
             </span>
 </div>
 
@@ -208,52 +180,8 @@
     $(function () {
 
         {#$('#select_div').height($(window).height())#}
-
-        $("#model_div").height($(window).height())
         $('body').height($(window).height())
-
-
-
         $('.add_data').width(100)
-
-
-
-        $('#threshold').offset({
-            left: 20
-        })
-        $("#model_div").jScrollPane();
-        $("#model_div").offset({
-            top: 40,
-            left: 400
-        })
-
-
-        $("#button_div").width(180)
-
-        $(".rule_button").hide()
-        {% if text_model %}
-            $(".rule_button").show()
-        {% endif %}
-
-        $('.rule_button').click(function () {
-            console.log("---")
-            $(this).css('background', 'red')
-            $(this).siblings(".rule_button").css('background', 'lightgreen')
-            {#console.log($("#".concat($(this).attr('id'), 'M')).attr('id'))#}
-            $('.rule_div').hide()
-            $("#" + $(this).attr('id') + "M").show()
-            {#$('#Never-togetherM').show()#}
-            {#console.log("nmd")#}
-        })
-
-        $('#Equivalence').click()
-
-
-        $('#all').click(function () {
-            $('.rule_div').show()
-        })
-
-
 
     })
 </script>

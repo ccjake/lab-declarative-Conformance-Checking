@@ -28,7 +28,7 @@ pools = ["1"]
 datamodels = {"1": ["aa"]}
 tables = {"aa": ["bb"]}
 # cn = Celonis_Connect()
-
+model = None
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1] in ALLOWED_EXTENSIONS
@@ -191,40 +191,41 @@ def data_handel(request):
 def discover():
     # get the uploaded file
     error = None
-    model = {
-        "equivalence": [
-            ("ER_Registration", "ER_Triage"),
-            ("ER_Registration", "IV_Antibiotics"),
-            ("ER_Triage", "ER_Registration"),
-            ("ER_Triage", "IV_Antibiotics"),
-            ("IV_Antibiotics", "ER_Registration"),
-            ("IV_Antibiotics", "ER_Triage"),
-        ],
-        "always_after": [
-            ("ER_Registration", "ER_Sepsis_Triage"),
-            ("ER_Registration", "ER_Triage"),
-            ("ER_Registration", "IV_Antibiotics"),
-            ("ER_Triage", "ER_Sepsis_Triage"),
-            ("IV_Antibiotics", "ER_Sepsis_Triage"),
-            ("IV_Antibiotics", "ER_Triage"),
-        ],
-        "always_before": [
-            ("ER_Triage", "ER_Registration"),
-            ("ER_Triage", "IV_Antibiotics"),
-            ("IV_Antibiotics", "ER_Registration"),
-        ],
-        "never_together": [],
-        "directly_follows": [
-            ("ER_Registration", "IV_Antibiotics"),
-            ("ER_Triage", "ER_Sepsis_Triage"),
-        ],
-        "activ_freq": {
-            "ER_Registration": {1},
-            "ER_Sepsis_Triage": {5, 6},
-            "ER_Triage": {1},
-            "IV_Antibiotics": {1},
-        },
-    }
+    global model
+    # model = {
+    #     "equivalence": [
+    #         ("ER_Registration", "ER_Triage"),
+    #         ("ER_Registration", "IV_Antibiotics"),
+    #         ("ER_Triage", "ER_Registration"),
+    #         ("ER_Triage", "IV_Antibiotics"),
+    #         ("IV_Antibiotics", "ER_Registration"),
+    #         ("IV_Antibiotics", "ER_Triage"),
+    #     ],
+    #     "always_after": [
+    #         ("ER_Registration", "ER_Sepsis_Triage"),
+    #         ("ER_Registration", "ER_Triage"),
+    #         ("ER_Registration", "IV_Antibiotics"),
+    #         ("ER_Triage", "ER_Sepsis_Triage"),
+    #         ("IV_Antibiotics", "ER_Sepsis_Triage"),
+    #         ("IV_Antibiotics", "ER_Triage"),
+    #     ],
+    #     "always_before": [
+    #         ("ER_Triage", "ER_Registration"),
+    #         ("ER_Triage", "IV_Antibiotics"),
+    #         ("IV_Antibiotics", "ER_Registration"),
+    #     ],
+    #     "never_together": [],
+    #     "directly_follows": [
+    #         ("ER_Registration", "IV_Antibiotics"),
+    #         ("ER_Triage", "ER_Sepsis_Triage"),
+    #     ],
+    #     "activ_freq": {
+    #         "ER_Registration": {1},
+    #         "ER_Sepsis_Triage": {5, 6},
+    #         "ER_Triage": {1},
+    #         "IV_Antibiotics": {1},
+    #     },
+    # }
     if request.method == "POST":
         global cn
         global pools
@@ -236,11 +237,11 @@ def discover():
 
         ## model discover
         if "table_discover" in request.form:
-            # table = request.form["table_discover"]
-            # datamodel_name = request.form["datamodel_discover"]
-            # datamodel = cn.c.datamodels.find(datamodel_name)
-            # threshold = int(request.form["threshold"])
-            # model = declare_model_discover(datamodel, table, (1 - threshold))
+            table = request.form["table_discover"]
+            datamodel_name = request.form["datamodel_discover"]
+            datamodel = cn.c.datamodels.find(datamodel_name)
+            threshold = int(request.form["threshold"])
+            model = declare_model_discover(datamodel, table, (1 - threshold))
             text_model = {}
             text_model["EquivalenceM"] = [
                 (
@@ -303,9 +304,16 @@ def discover():
                 text_model=text_model,
             )
     return render_template(
-        "discover.html", pools=pools, datamodels=datamodels, tables=tables,text_model = model
+        "discover.html", pools=pools, datamodels=datamodels, tables=tables,model = None
     )
 
+
+@app.route("/conformance_checking",methods=["GET","POST"])
+def conformance():
+    global pools
+    global datamodels
+    global tables
+    return render_template("conformance.html",pools=pools, datamodels=datamodels, tables=tables)
 
 if __name__ == "__main__":
     app.run(port=5000)

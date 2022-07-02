@@ -15,21 +15,17 @@ body {
     /*height: 500px;*/
     /*position: center;*/
     display: inline-block;
-
+    margin: 40px;
     text-decoration: none;
-    margin-left: auto;
-    margin-right: auto;
     text-align:center;
     vertical-align: top;
-    position: absolute;
-    top:800px;
+    position: relative;
+    top:350px;
     /*border: 1px solid black;*/
 
 }
 .select_div{
-    border: 1px solid black;
     text-align:center;
-    position: relative;
 }
 
 #select_div{
@@ -72,7 +68,6 @@ body {
     background-color: slateblue;
     height: 50px;
     width: 100px;
-    border: 2px red;
 }
 
 
