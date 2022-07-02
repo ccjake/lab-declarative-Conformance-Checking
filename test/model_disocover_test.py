@@ -8,20 +8,29 @@ from pm4py.objects.log.importer.xes import importer as xes_importer
 
 class TestModel(unittest.TestCase):
     @classmethod
-    def setUpClass(cls):
-        cls.cn = Celonis_Connect()
-        test_log = xes_importer.apply("../example_log/synthetic event log.xes")
-        cls.pm4py_sekelton_model = lsk_discovery.apply(test_log)
-        for k in cls.pm4py_sekelton_model.keys():
+    def setTestLog(cls,path):
+        test_log = xes_importer.apply(path)
+        pm4py_sekelton_model = lsk_discovery.apply(test_log)
+        for k in pm4py_sekelton_model.keys():
             if k == TEMPLATE.Activity_Frequency.value:
                 continue
-            cls.pm4py_sekelton_model[k] = list(cls.pm4py_sekelton_model[k])
-            cls.pm4py_sekelton_model[k].sort()
+            pm4py_sekelton_model[k] = list(pm4py_sekelton_model[k])
+            pm4py_sekelton_model[k].sort()
 
+        return pm4py_sekelton_model
+    @classmethod
+    def setUpClass(cls):
+        cls.cn = Celonis_Connect()
+
+        cls.pm4py_sekelton_model = cls.setTestLog("../example_log/synthetic event log.xes")
         cls.cn.set_datamodel("synthetic")
-        cls.datamodel = cls.cn.get_datamodel()
-
         cls.cn.set_table("synthetic_event_log_xes")
+
+        # cls.pm4py_sekelton_model = cls.setTestLog("../example_log/example_log.xes")
+        # cls.cn.set_datamodel("rum_example")
+        # cls.cn.set_table("example_log_xes")
+
+        cls.datamodel = cls.cn.get_datamodel()
         cls.table_name = cls.cn.get_table().name
         activities_query = PQL()
         activities_query.add(
@@ -150,6 +159,9 @@ class TestModel(unittest.TestCase):
         Test the whole model discoverd by pql
         """
         pql_skeleton = declare_model_discover(self.datamodel,self.table_name)
+        # print(pql_skeleton)
+        # print("---")
+        # print(self.pm4py_sekelton_model)
         self.assertDictEqual(self.pm4py_sekelton_model,pql_skeleton)
 
 
@@ -159,7 +171,9 @@ class TestModel(unittest.TestCase):
         add noise to test the model by skeleton algo discovered model in pm4py
         @return:
         """
-        test_log = xes_importer.apply("../example_log/synthetic event log.xes")
+        # test_log = xes_importer.apply("../example_log/synthetic event log.xes")
+        test_log = xes_importer.apply("../example_log/example_log.xes")
+
         for i in range(0,10,2):
             noise = i/10
             pm4py_sekelton_model = lsk_discovery.apply(test_log,parameters={lsk_discovery.Variants.CLASSIC.value.Parameters.NOISE_THRESHOLD: noise})
@@ -182,7 +196,8 @@ class TestModel(unittest.TestCase):
             self.assertEqual(pm4py_skeleton, pql_skeleton)
 
     def test_skeleton_discovery_with_noise(self):
-        test_log = xes_importer.apply("../example_log/synthetic event log.xes")
+        # test_log = xes_importer.apply("../example_log/synthetic event log.xes")
+        test_log = xes_importer.apply("../example_log/example_log.xes")
         for i in range(0,10,2):
             noise = i/10
             pm4py_sekelton_model = lsk_discovery.apply(test_log,parameters={lsk_discovery.Variants.CLASSIC.value.Parameters.NOISE_THRESHOLD: noise})
