@@ -198,6 +198,8 @@ def activ_freq(datamodel, table: str, activities_df, noise_threshold):
     # queries.add(case_id_query(table))
     queries.add(PQLColumn(name="trace", query="VARIANT(\"" + table + "\".\"concept:name\")"))
     queries.add(PQLColumn(name="frequency", query="COUNT(\"" + table + "_cases\".\"Case Id\")"))
+    for a in activities:
+        queries.add(PQLColumn(name=a,query="CALC_REWORK(\""+table+"\".\"concept:name\" in ('"+a+"\'))"))
     df = pd.DataFrame(datamodel.get_data_frame(queries))
     df.set_index('trace', inplace=True)
     trace_list = list(df.index.values)
@@ -206,25 +208,26 @@ def activ_freq(datamodel, table: str, activities_df, noise_threshold):
 
     activ_freq = {}
     for activity in activities:
-        freq_number = {}
-        for trace in trace_list:
-            freq = trace.count(activity)
-            if freq not in list(freq_number.keys()):
-                freq_number[freq] = df.loc[trace, "frequency"]
-            else:
-                freq_number[freq] += df.loc[trace, "frequency"]
-        threshold = 0
-        freq_list = []
-        numer_freq = dict(zip(freq_number.values(), freq_number.keys()))
-
-        for key in sorted(list(numer_freq.keys()), reverse=True):
-            threshold += key
-            freq_list.append(numer_freq[key])
-            if (threshold < log_traces * (1 - noise_threshold)):
-                continue
-            else:
-                activ_freq[activity] = set(freq_list)
-                break
+        activ_freq[activity]=set(df[activity])
+        # freq_number = {}
+        # for trace in trace_list:
+        #     freq = trace.count(activity)
+        #     if freq not in list(freq_number.keys()):
+        #         freq_number[freq] = df.loc[trace, "frequency"]
+        #     else:
+        #         freq_number[freq] += df.loc[trace, "frequency"]
+        # threshold = 0
+        # freq_list = []
+        # numer_freq = dict(zip(freq_number.values(), freq_number.keys()))
+        #
+        # for key in sorted(list(numer_freq.keys()), reverse=True):
+        #     threshold += key
+        #     freq_list.append(numer_freq[key])
+        #     if (threshold < log_traces * (1 - noise_threshold)):
+        #         continue
+        #     else:
+        #         activ_freq[activity] = set(freq_list)
+        #         break
 
     return activ_freq
     # df.set_index("activity",inplace=True)

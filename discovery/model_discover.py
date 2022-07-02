@@ -1,8 +1,7 @@
 from pycelonis.celonis_api.pql.pql import PQL, PQLColumn
-
+from pycelonis.celonis_api.event_collection import table_push_manager
 from templates import TEMPLATE
 from discovery.templates_func import template_func_dict
-
 
 def declare_model_discover(datamodel, table: str, noise_threshold = 0.0):
     """

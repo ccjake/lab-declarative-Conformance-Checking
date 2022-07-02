@@ -16,6 +16,7 @@ def validate_image(stream):
 @app.route('/')
 def index():
     return render_template('index.html')
+
 @app.route('/', methods=['POST'])
 def upload_files():
     uploaded_file = request.files['file']
