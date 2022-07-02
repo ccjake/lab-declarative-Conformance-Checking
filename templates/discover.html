@@ -164,7 +164,7 @@
     datamodel.change(function () {
         table.empty();
         table.append($('<option/>'));
-        var tables_sel = tables[datamodel.val()];
+        var tables_sel = tables[pool.val()][datamodel.val()];
         $('#to_add_table').after($('<input/>', {'type': 'hidden', 'value': pool.val(), 'name': 'selected_pool'}))
         $('#to_add_table').after($('<input/>', {
             'type': 'hidden',

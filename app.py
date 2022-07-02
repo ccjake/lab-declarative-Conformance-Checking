@@ -30,6 +30,7 @@ tables = {"aa": ["bb"]}
 # cn = Celonis_Connect()
 model = None
 
+
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1] in ALLOWED_EXTENSIONS
 
@@ -54,8 +55,11 @@ def login_celonis():
                 for pool in cn.get_pools()
             }
             tables = {
-                datamodel.name: [table.name for table in datamodel.tables]
-                for datamodel in cn.get_datamodels()
+                pool.name: {
+                    datamodel.name: [table.name for table in datamodel.tables]
+                    for datamodel in cn.get_datamodels_by_pool(pool.name)
+                }
+                for pool in cn.get_pools()
             }
 
             ## return pools, datamodels, tables for select
@@ -166,8 +170,11 @@ def data_handel(request):
                 )
                 datamodel.reload()
                 tables = {
-                    datamodel.name: [table.name for table in datamodel.tables]
-                    for datamodel in cn.get_datamodels()
+                    pool.name: {
+                        datamodel.name: [table.name for table in datamodel.tables]
+                        for datamodel in cn.get_datamodels_by_pool(pool.name)
+                    }
+                    for pool in cn.get_pools()
                 }
             return render_template(
                 "discover.html",
@@ -254,44 +261,42 @@ def discover():
                 for (a, b) in model["equivalence"]
             ]
             text_model["Always-afterM"] = [
-                ("Activity '"
-                + a
-                + "' is alywas followed by '"
-                + b
-                + "' ")
+                ("Activity '" + a + "' is alywas followed by '" + b + "' ")
                 for (a, b) in model["always_after"]
             ]
             text_model["Always-beforeM"] = [
-                ("Activity '"
-                + a
-                + "' is alywas preceded by '"
-                + b
-                + "' ")
+                ("Activity '" + a + "' is alywas preceded by '" + b + "' ")
                 for (a, b) in model["always_before"]
             ]
             text_model["Never-togetherM"] = [
-                ("Activity '"
-                 + a
-                 + "' and activity '"
-                 + b
-                 + "' never occur in a same trace")
+                (
+                    "Activity '"
+                    + a
+                    + "' and activity '"
+                    + b
+                    + "' never occur in a same trace"
+                )
                 for (a, b) in model["never_together"]
             ]
             text_model["Directly-followsM"] = [
-                ("Activity '"
-                + a
-                + "' is alywas directly followed by '"
-                + b
-                + "' ")
+                ("Activity '" + a + "' is alywas directly followed by '" + b + "' ")
                 for (a, b) in model["directly_follows"]
             ]
 
-            for _ in model['activ_freq'].keys():
-                model['activ_freq'][_] = "[" + ", ".join(map(str, model['activ_freq'][_])) + "]"
+            for _ in model["activ_freq"].keys():
+                model["activ_freq"][_] = (
+                    "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
+                )
 
-            text_model['OccurrencesM'] = [
-                ("Activity '" + a + "' can happen " + model['activ_freq'][a] + " times in one trace")
-                for a in model['activ_freq'].keys()
+            text_model["OccurrencesM"] = [
+                (
+                    "Activity '"
+                    + a
+                    + "' can happen "
+                    + model["activ_freq"][a]
+                    + " times in one trace"
+                )
+                for a in model["activ_freq"].keys()
             ]
             print(text_model)
 
@@ -304,16 +309,19 @@ def discover():
                 text_model=text_model,
             )
     return render_template(
-        "discover.html", pools=pools, datamodels=datamodels, tables=tables,model = None
+        "discover.html", pools=pools, datamodels=datamodels, tables=tables, model=None
     )
 
 
-@app.route("/conformance_checking",methods=["GET","POST"])
+@app.route("/conformance_checking", methods=["GET", "POST"])
 def conformance():
     global pools
     global datamodels
     global tables
-    return render_template("conformance.html",pools=pools, datamodels=datamodels, tables=tables)
+    return render_template(
+        "conformance.html", pools=pools, datamodels=datamodels, tables=tables
+    )
+
 
 if __name__ == "__main__":
     app.run(port=5000)

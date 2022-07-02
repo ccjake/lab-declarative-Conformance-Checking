@@ -58,6 +58,11 @@ class Celonis_Connect:
         except:
             print("no datamodel found")
 
+    def get_datamodels_by_pool(self,pool):
+
+        return [datamodel for datamodel in self.c.pools.find(pool).datamodels]
+
+
     def get_tables(self):
         """
         @return: the all data tables according to the current datamodel
