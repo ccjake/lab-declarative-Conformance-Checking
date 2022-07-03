@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 from os.path import join, dirname, realpath
+import shutil
 from celonis_connect import Celonis_Connect
 from werkzeug.utils import secure_filename
 
@@ -8,6 +9,12 @@ from pm4py.objects.log.importer.xes import importer as xes_importer
 from pm4py import convert_to_dataframe
 from discovery.model_discover import declare_model_discover
 
+import pandas as pd
+
+from conformance_checking.conformance_check import conformance_checking
+from conformance_checking.conformance_check import variant_table
+
+import json
 app = Flask(__name__)
 
 # enable debugging mode
@@ -15,6 +22,7 @@ app.config["DEBUG"] = True
 
 # Uploads folder
 UPLOAD_FOLDER = join(dirname(realpath(__file__)), "static/Uploads/")
+TEMP = join(dirname(realpath(__file__)),'temp/')
 ALLOWED_EXTENSIONS = set(["xes"])
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -28,8 +36,8 @@ pools = ["1"]
 datamodels = {"1": ["aa"]}
 tables = {"aa": ["bb"]}
 # cn = Celonis_Connect()
+text_model = None
 model = None
-
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1] in ALLOWED_EXTENSIONS
@@ -37,6 +45,9 @@ def allowed_file(filename):
 
 @app.route("/", methods=["POST", "GET"])
 def login_celonis():
+    dp = join(dirname(realpath(__file__)), 'temp')
+    shutil.rmtree(dp)
+    os.mkdir(dp)
     global result
     global cn
     if request.method == "POST":
@@ -198,41 +209,90 @@ def data_handel(request):
 def discover():
     # get the uploaded file
     error = None
-    global model
-    # model = {
-    #     "equivalence": [
-    #         ("ER_Registration", "ER_Triage"),
-    #         ("ER_Registration", "IV_Antibiotics"),
-    #         ("ER_Triage", "ER_Registration"),
-    #         ("ER_Triage", "IV_Antibiotics"),
-    #         ("IV_Antibiotics", "ER_Registration"),
-    #         ("IV_Antibiotics", "ER_Triage"),
-    #     ],
-    #     "always_after": [
-    #         ("ER_Registration", "ER_Sepsis_Triage"),
-    #         ("ER_Registration", "ER_Triage"),
-    #         ("ER_Registration", "IV_Antibiotics"),
-    #         ("ER_Triage", "ER_Sepsis_Triage"),
-    #         ("IV_Antibiotics", "ER_Sepsis_Triage"),
-    #         ("IV_Antibiotics", "ER_Triage"),
-    #     ],
-    #     "always_before": [
-    #         ("ER_Triage", "ER_Registration"),
-    #         ("ER_Triage", "IV_Antibiotics"),
-    #         ("IV_Antibiotics", "ER_Registration"),
-    #     ],
-    #     "never_together": [],
-    #     "directly_follows": [
-    #         ("ER_Registration", "IV_Antibiotics"),
-    #         ("ER_Triage", "ER_Sepsis_Triage"),
-    #     ],
-    #     "activ_freq": {
-    #         "ER_Registration": {1},
-    #         "ER_Sepsis_Triage": {5, 6},
-    #         "ER_Triage": {1},
-    #         "IV_Antibiotics": {1},
-    #     },
-    # }
+    global text_model
+    model = {
+        "equivalence": [
+            ("ER_Registration", "ER_Triage"),
+            ("ER_Registration", "IV_Antibiotics"),
+            ("ER_Triage", "ER_Registration"),
+            ("ER_Triage", "IV_Antibiotics"),
+            ("IV_Antibiotics", "ER_Registration"),
+            ("IV_Antibiotics", "ER_Triage"),
+        ],
+        "always_after": [
+            ("ER_Registration", "ER_Sepsis_Triage"),
+            ("ER_Registration", "ER_Triage"),
+            ("ER_Registration", "IV_Antibiotics"),
+            ("ER_Triage", "ER_Sepsis_Triage"),
+            ("IV_Antibiotics", "ER_Sepsis_Triage"),
+            ("IV_Antibiotics", "ER_Triage"),
+        ],
+        "always_before": [
+            ("ER_Triage", "ER_Registration"),
+            ("ER_Triage", "IV_Antibiotics"),
+            ("IV_Antibiotics", "ER_Registration"),
+        ],
+        "never_together": [],
+        "directly_follows": [
+            ("ER_Registration", "IV_Antibiotics"),
+            ("ER_Triage", "ER_Sepsis_Triage"),
+        ],
+        "activ_freq": {
+            "ER_Registration": {1},
+            "ER_Sepsis_Triage": {5, 6},
+            "ER_Triage": {1},
+            "IV_Antibiotics": {1},
+        },
+    }
+    text_model = {}
+    text_model["EquivalenceM"] = [
+        (
+                "Activity '"
+                + a
+                + "' and activity '"
+                + b
+                + "' always occur with same frequency into a trace"
+        )
+        for (a, b) in model["equivalence"]
+    ]
+    text_model["Always-afterM"] = [
+        ("Activity '" + a + "' is alywas followed by '" + b + "' ")
+        for (a, b) in model["always_after"]
+    ]
+    text_model["Always-beforeM"] = [
+        ("Activity '" + a + "' is alywas preceded by '" + b + "' ")
+        for (a, b) in model["always_before"]
+    ]
+    text_model["Never-togetherM"] = [
+        (
+                "Activity '"
+                + a
+                + "' and activity '"
+                + b
+                + "' never occur in a same trace"
+        )
+        for (a, b) in model["never_together"]
+    ]
+    text_model["Directly-followsM"] = [
+        ("Activity '" + a + "' is alywas directly followed by '" + b + "' ")
+        for (a, b) in model["directly_follows"]
+    ]
+
+    for _ in model["activ_freq"].keys():
+        model["activ_freq"][_] = (
+                "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
+        )
+
+    text_model["OccurrencesM"] = [
+        (
+                "Activity '"
+                + a
+                + "' can happen "
+                + model["activ_freq"][a]
+                + " times in one trace"
+        )
+        for a in model["activ_freq"].keys()
+    ]
     if request.method == "POST":
         global cn
         global pools
@@ -244,6 +304,7 @@ def discover():
 
         ## model discover
         if "table_discover" in request.form:
+            # global model
             table = request.form["table_discover"]
             datamodel_name = request.form["datamodel_discover"]
             datamodel = cn.c.datamodels.find(datamodel_name)
@@ -298,7 +359,6 @@ def discover():
                 )
                 for a in model["activ_freq"].keys()
             ]
-            print(text_model)
 
             # print(declare_model_discover(datamodel, table, (1 - threshold)))
             return render_template(
@@ -309,8 +369,16 @@ def discover():
                 text_model=text_model,
             )
     return render_template(
-        "discover.html", pools=pools, datamodels=datamodels, tables=tables, model=None
+        "discover.html", pools=pools, datamodels=datamodels, tables=tables, text_model=text_model
     )
+
+
+def read_json(jsonname):
+    path = join(dirname(realpath(__file__)),jsonname)
+    with open(path,'r') as j:
+        dic = json.loads(j.read())
+    return dic
+
 
 
 @app.route("/conformance_checking", methods=["GET", "POST"])
@@ -318,10 +386,76 @@ def conformance():
     global pools
     global datamodels
     global tables
+    global model
+    path = join(dirname(realpath(__file__)),'statis.json')
+    with open(path,'r') as j:
+        statis = json.loads(j.read())
+
+    path = join(dirname(realpath(__file__)),'con.json')
+    with open(path,'r') as j:
+        conf = json.loads(j.read())
+    # conf = json.loads("/Users/baichaoye/PycharmProjects/lab-declarative-Conformance-Checking/con.json")
+    # print(model)
+
+
+    if request.method == "POST":
+        global cn
+        global pools
+        global datamodels
+        global tables
+
+        data_handel(request)
+
+        ## upload model
+        if 'model_name' in request.files:
+            model_file = request.files['model_name']
+            model_name = secure_filename(model_file.filename)
+            file_path = TEMP+model_name
+            model_file.save(file_path)
+            model = read_json(model_name)
+
+            return render_template("conformance.html", pools=pools, datamodels=datamodels, tables=tables, model=model)
+
+
+        if "table_discover" in request.form:
+            table = request.form["table_discover"]
+            datamodel_name = request.form["datamodel_discover"]
+            datamodel = cn.c.datamodels.find(datamodel_name)
+            conf,statis = conformance_checking(datamodel,table,model)
+            d = json.dumps(conf)
+            path = join(dirname(realpath(__file__)), 'con.json')
+            g = open(path, 'w')
+            g.write(d)
+            g.close()
+
+            d = json.dumps(statis)
+            path = join(dirname(realpath(__file__)), 'statis.json')
+            g = open(path, 'w')
+            g.write(d)
+            g.close()
+
+            return render_template("conformance.html",pools=pools, datamodels=datamodels, tables=tables,model = model,conf = conf,statis=statis)
+
+
+
     return render_template(
-        "conformance.html", pools=pools, datamodels=datamodels, tables=tables
+        "conformance.html", pools=pools, datamodels=datamodels, tables=tables,model = model,conf = conf,statis=statis
     )
 
+@app.route("/download",methods=["GET", "POST"])
+def download_model():
+    global model
 
+    if request.method == "POST":
+        if "model_name" in request.form:
+            name = request.form["model_name"]
+            dp = join(dirname(realpath(__file__)), "static/")
+            f2 = open((dp+name+'.json'),'w')
+            f2.write(model)
+            f2.close()
+
+
+    return redirect("/discover")
 if __name__ == "__main__":
+
     app.run(port=5000)

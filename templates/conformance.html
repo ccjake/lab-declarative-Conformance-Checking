@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Upload file</title>
+    <title>Conformance Checking</title>
     <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
     <script type="text/javascript" src="../static/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
@@ -48,15 +48,91 @@
     <br>
     <br>
     <form method="POST">
-        <input type="submit" value="Conformance Check" class="bigSub" id="discover" disabled>
+        <input type="submit" value="Conformance Check" class="bigSub" id="check" disabled>
     </form>
+    <button class="up_open" id="up_open">Upload</button>
+</div>
+{% if statis %}
+    <div id="top_div">
+        <div id="statis_div">
+            <p>Statistics</p>
+            <p>Total Traces : {{ statis[0] }}</p>
+            <p>Fulfilled Traces: {{ statis[1] }}</p>
+            <p>Violated Traces: {{ statis[2] }}</p>
+
+        </div>
+
+        <div id="info_div" style="position: absolute;top:130px;width: 400px;">
+            Legend: &nbsp;&nbsp;&nbsp; <span class="circle_red"
+                                             style="border: 1px solid">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            &nbsp;Vilation&nbsp;&nbsp;&nbsp;<span class="circle_green">&nbsp;&nbsp;&nbsp;&nbsp;</span>&nbsp; Fulfillment
+            &nbsp;&nbsp;&nbsp;<span class="circle_gray">&nbsp;&nbsp;&nbsp;&nbsp;</span> Irrelevant
+        </div>
+
+    </div>
+{% endif %}
+<div id="right_div">
+
 
 </div>
 
 
+<div style="" id="trace_dis">
+    {% if conf %}
+        {% for id in conf.keys() %}
+            <details class="trace_det" open>
+                <summary style="height: 70px;">
+                    CASE ID:{{ id }}
+                    <hr>
+                    Activations: {{ conf[id]['activations'] }} &nbsp;&nbsp;&nbsp;&nbsp;
+                    Fulfilments: {{ conf[id]['fulfill'] | length }} &nbsp;&nbsp;&nbsp;&nbsp;
+                    Violations: {{ conf[id]['violations'] |length }}
+                    <hr>
+                </summary>
+                {% for l in conf[id]['fulfill'] %}
+                    <div class="confor_div{{ loop.index0 }} confor_div" id="{{ id }}">
+                        {% for i in l.keys() %}
+                            {{ i }} :
+                            {% for j in l[i][1] %}
+                                {% if loop.index0 in l[i][0] %}
+                                    <span class="circle_green circle">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                {% else %}
+                                    <span class="circle_gray circle">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                {% endif %}
+
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                {% for l in conf[id]['v'] %}
+                    <div class="violations">
+                        {% for i in l.keys() %}
+                            {{ i }} :
+                            {% for j in l[i][1] %}
+                                {% if loop.index0 in l[i][0] %}
+                                    <span class="circle_red circle">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                {% else %}
+                                    <span class="circle_gray circle">&nbsp;&nbsp;&nbsp;&nbsp;</span>
+                                {% endif %}
+
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+            </details>
+        {% endfor %}
+    {% endif %}
+
+</div>
+
+</details>
+
+</div>
+
 <!--discover button-->
 <div id="conformance_button">
-        <span class="select">
+    z<span class="select">
             <a href="{{ url_for( 'discover' ) }}" class="select_url">
                     <img src="{{ url_for('static',filename = '/images/discover.png') }}" width="120px">
                 <br>
@@ -91,10 +167,20 @@
     </form>
 </section>
 
+
+<section id="up">
+    <h3>Upload Model</h3>
+    <form method="POST" action="/conformance_checking" enctype=multipart/form-data>
+        <input type="file" name="model_name" required accept=".json" required>
+        <input type="submit" value="Up Model">
+    </form>
+</section>
+
 <script>
     $('#add_pool').popup();
     $('#add_datamodel').popup();
     $('#add_table').popup();
+    $('#up').popup();
 </script>
 
 
@@ -152,9 +238,9 @@
     })
 
     table.change(function () {
-        $("#discover").before($('<input/>', {'type': 'hidden', 'value': table.val(), 'name': 'table_discover'}))
-        $("#discover").before($('<input/>', {'type': 'hidden', 'value': datamodel.val(), 'name': 'datamodel_discover'}))
-        $("#discover").prop("disabled", false)
+        $("#check").before($('<input/>', {'type': 'hidden', 'value': table.val(), 'name': 'table_discover'}))
+        $("#check").before($('<input/>', {'type': 'hidden', 'value': datamodel.val(), 'name': 'datamodel_discover'}))
+        $("#check").prop("disabled", false)
     })
 
 </script>
@@ -177,11 +263,53 @@
 
 <script>
 
+
     $(function () {
 
-        {#$('#select_div').height($(window).height())#}
         $('body').height($(window).height())
         $('.add_data').width(100)
+        $("#trace_dis").jScrollPane()
+        {% if model %}
+            $('#check').prop('disabled', false)
+        {% endif %}
+
+        {% for id in conf.keys() %}
+            {% for l in conf[id]['fulfill'] %}
+                $("#{{ id }}.confor_div{{ loop.index0 }}").click(function (){
+                $("#right_div").empty()
+                {% for i in l.keys() %}
+                {% for j in l[i][1] %}
+                    {% if loop.index0 in l[i][0] %}
+                        $("#right_div").append('<div class="right_sub_div" style="background-color: lightgreen">{{ j }} </div>')
+                    {% else %}
+                        $("#right_div").append('<div class="right_sub_div" style="background-color: gray">{{ j }}</div>')
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+
+        })
+        {% endfor %}
+        {% endfor %}
+
+
+        {% for id in conf.keys() %}
+            {% for l in conf[id]['violations'] %}
+                $("#{{ id }}.confor_div{{ loop.index0 }}").click(function (){
+                $("#right_div").empty()
+                {% for i in l.keys() %}
+                {% for j in l[i][1] %}
+                    {% if loop.index0 in l[i][0] %}
+                        $("#right_div").append('<div class="right_sub_div" style="background-color: red">{{ j }} </div>')
+                    {% else %}
+                        $("#right_div").append('<div class="right_sub_div" style="background-color: gray">{{ j }}</div>')
+                    {% endif %}
+                {% endfor %}
+            {% endfor %}
+
+        })
+        {% endfor %}
+        {% endfor %}
+
 
     })
 </script>
