@@ -104,7 +104,7 @@ def stric_conformance(datamodel, table, model):
 
     select_id = str("','".join(v_df.index.values.tolist()))
     filter_query = (
-            'FILTER DOMAIN "synthetic_event_log_xes_CASES"."Case ID" IN ( \''
+            'FILTER DOMAIN "'+ table+'"."Case ID" IN ( \''
             + select_id
             + "' )"
     )

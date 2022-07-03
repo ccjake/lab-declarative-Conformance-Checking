@@ -207,157 +207,157 @@ def data_handel(request):
 @app.route("/discover", methods=["GET", "POST"])
 def discover():
     # get the uploaded file
-    error = None
+    global model
+    print(model)
     global text_model
-    model = {
-        "equivalence": [
-            ("ER_Registration", "ER_Triage"),
-            ("ER_Registration", "IV_Antibiotics"),
-            ("ER_Triage", "ER_Registration"),
-            ("ER_Triage", "IV_Antibiotics"),
-            ("IV_Antibiotics", "ER_Registration"),
-            ("IV_Antibiotics", "ER_Triage"),
-        ],
-        "always_after": [
-            ("ER_Registration", "ER_Sepsis_Triage"),
-            ("ER_Registration", "ER_Triage"),
-            ("ER_Registration", "IV_Antibiotics"),
-            ("ER_Triage", "ER_Sepsis_Triage"),
-            ("IV_Antibiotics", "ER_Sepsis_Triage"),
-            ("IV_Antibiotics", "ER_Triage"),
-        ],
-        "always_before": [
-            ("ER_Triage", "ER_Registration"),
-            ("ER_Triage", "IV_Antibiotics"),
-            ("IV_Antibiotics", "ER_Registration"),
-        ],
-        "never_together": [],
-        "directly_follows": [
-            ("ER_Registration", "IV_Antibiotics"),
-            ("ER_Triage", "ER_Sepsis_Triage"),
-        ],
-        "activ_freq": {
-            "ER_Registration": {1},
-            "ER_Sepsis_Triage": {5, 6},
-            "ER_Triage": {1},
-            "IV_Antibiotics": {1},
-        },
-    }
-    text_model = {}
-    text_model["EquivalenceM"] = [
-        (
-                "Activity '"
-                + a
-                + "' and activity '"
-                + b
-                + "' always occur with same frequency into a trace"
-        )
-        for (a, b) in model["equivalence"]
-    ]
-    text_model["Always-afterM"] = [
-        ("Activity '" + a + "' is alywas followed by '" + b + "' ")
-        for (a, b) in model["always_after"]
-    ]
-    text_model["Always-beforeM"] = [
-        ("Activity '" + a + "' is alywas preceded by '" + b + "' ")
-        for (a, b) in model["always_before"]
-    ]
-    text_model["Never-togetherM"] = [
-        (
-                "Activity '"
-                + a
-                + "' and activity '"
-                + b
-                + "' never occur in a same trace"
-        )
-        for (a, b) in model["never_together"]
-    ]
-    text_model["Directly-followsM"] = [
-        ("Activity '" + a + "' is alywas directly followed by '" + b + "' ")
-        for (a, b) in model["directly_follows"]
-    ]
-
-    for _ in model["activ_freq"].keys():
-        model["activ_freq"][_] = (
-                "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
-        )
-
-    text_model["OccurrencesM"] = [
-        (
-                "Activity '"
-                + a
-                + "' can happen "
-                + model["activ_freq"][a]
-                + " times in one trace"
-        )
-        for a in model["activ_freq"].keys()
-    ]
+    # model = {
+    #     "equivalence": [
+    #         ("ER_Registration", "ER_Triage"),
+    #         ("ER_Registration", "IV_Antibiotics"),
+    #         ("ER_Triage", "ER_Registration"),
+    #         ("ER_Triage", "IV_Antibiotics"),
+    #         ("IV_Antibiotics", "ER_Registration"),
+    #         ("IV_Antibiotics", "ER_Triage"),
+    #     ],
+    #     "always_after": [
+    #         ("ER_Registration", "ER_Sepsis_Triage"),
+    #         ("ER_Registration", "ER_Triage"),
+    #         ("ER_Registration", "IV_Antibiotics"),
+    #         ("ER_Triage", "ER_Sepsis_Triage"),
+    #         ("IV_Antibiotics", "ER_Sepsis_Triage"),
+    #         ("IV_Antibiotics", "ER_Triage"),
+    #     ],
+    #     "always_before": [
+    #         ("ER_Triage", "ER_Registration"),
+    #         ("ER_Triage", "IV_Antibiotics"),
+    #         ("IV_Antibiotics", "ER_Registration"),
+    #     ],
+    #     "never_together": [],
+    #     "directly_follows": [
+    #         ("ER_Registration", "IV_Antibiotics"),
+    #         ("ER_Triage", "ER_Sepsis_Triage"),
+    #     ],
+    #     "activ_freq": {
+    #         "ER_Registration": {1},
+    #         "ER_Sepsis_Triage": {5, 6},
+    #         "ER_Triage": {1},
+    #         "IV_Antibiotics": {1},
+    #     },
+    # }
+    # text_model = {}
+    # text_model["EquivalenceM"] = [
+    #     (
+    #             "Activity '"
+    #             + a
+    #             + "' and activity '"
+    #             + b
+    #             + "' always occur with same frequency into a trace"
+    #     )
+    #     for (a, b) in model["equivalence"]
+    # ]
+    # text_model["Always-afterM"] = [
+    #     ("Activity '" + a + "' is alywas followed by '" + b + "' ")
+    #     for (a, b) in model["always_after"]
+    # ]
+    # text_model["Always-beforeM"] = [
+    #     ("Activity '" + a + "' is alywas preceded by '" + b + "' ")
+    #     for (a, b) in model["always_before"]
+    # ]
+    # text_model["Never-togetherM"] = [
+    #     (
+    #             "Activity '"
+    #             + a
+    #             + "' and activity '"
+    #             + b
+    #             + "' never occur in a same trace"
+    #     )
+    #     for (a, b) in model["never_together"]
+    # ]
+    # text_model["Directly-followsM"] = [
+    #     ("Activity '" + a + "' is alywas directly followed by '" + b + "' ")
+    #     for (a, b) in model["directly_follows"]
+    # ]
+    #
+    # for _ in model["activ_freq"].keys():
+    #     model["activ_freq"][_] = (
+    #             "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
+    #     )
+    #
+    # text_model["OccurrencesM"] = [
+    #     (
+    #             "Activity '"
+    #             + a
+    #             + "' can happen "
+    #             + model["activ_freq"][a]
+    #             + " times in one trace"
+    #     )
+    #     for a in model["activ_freq"].keys()
+    # ]
     if request.method == "POST":
         global cn
         global pools
         global datamodels
         global tables
-
         ## add pool
         data_handel(request)
 
         ## model discover
         if "table_discover" in request.form:
-            # global model
             table = request.form["table_discover"]
             datamodel_name = request.form["datamodel_discover"]
             datamodel = cn.c.datamodels.find(datamodel_name)
             threshold = int(request.form["threshold"])
             model = declare_model_discover(datamodel, table, (1 - threshold))
-            text_model = {}
-            text_model["EquivalenceM"] = [
-                (
-                        "Activity '"
-                        + a
-                        + "' and activity '"
-                        + b
-                        + "' always occur with same frequency into a trace"
-                )
-                for (a, b) in model["equivalence"]
-            ]
-            text_model["Always-afterM"] = [
-                ("Activity '" + a + "' is alywas followed by '" + b + "' ")
-                for (a, b) in model["always_after"]
-            ]
-            text_model["Always-beforeM"] = [
-                ("Activity '" + a + "' is alywas preceded by '" + b + "' ")
-                for (a, b) in model["always_before"]
-            ]
-            text_model["Never-togetherM"] = [
-                (
-                        "Activity '"
-                        + a
-                        + "' and activity '"
-                        + b
-                        + "' never occur in a same trace"
-                )
-                for (a, b) in model["never_together"]
-            ]
-            text_model["Directly-followsM"] = [
-                ("Activity '" + a + "' is alywas directly followed by '" + b + "' ")
-                for (a, b) in model["directly_follows"]
-            ]
+            print(model)
+            # text_model = {}
+            # text_model["EquivalenceM"] = [
+            #     (
+            #             "Activity '"
+            #             + a
+            #             + "' and activity '"
+            #             + b
+            #             + "' always occur with same frequency into a trace"
+            #     )
+            #     for (a, b) in model["equivalence"]
+            # ]
+            # text_model["Always-afterM"] = [
+            #     ("Activity '" + a + "' is alywas followed by '" + b + "' ")
+            #     for (a, b) in model["always_after"]
+            # ]
+            # text_model["Always-beforeM"] = [
+            #     ("Activity '" + a + "' is alywas preceded by '" + b + "' ")
+            #     for (a, b) in model["always_before"]
+            # ]
+            # text_model["Never-togetherM"] = [
+            #     (
+            #             "Activity '"
+            #             + a
+            #             + "' and activity '"
+            #             + b
+            #             + "' never occur in a same trace"
+            #     )
+            #     for (a, b) in model["never_together"]
+            # ]
+            # text_model["Directly-followsM"] = [
+            #     ("Activity '" + a + "' is alywas directly followed by '" + b + "' ")
+            #     for (a, b) in model["directly_follows"]
+            # ]
+            #
+            # for _ in model["activ_freq"].keys():
+            #     model["activ_freq"][_] = (
+            #             "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
+            #     )
 
-            for _ in model["activ_freq"].keys():
-                model["activ_freq"][_] = (
-                        "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
-                )
-
-            text_model["OccurrencesM"] = [
-                (
-                        "Activity '"
-                        + a
-                        + "' can happen "
-                        + model["activ_freq"][a]
-                        + " times in one trace"
-                )
-                for a in model["activ_freq"].keys()
-            ]
+            # text_model["OccurrencesM"] = [
+            #     (
+            #             "Activity '"
+            #             + a
+            #             + "' can happen "
+            #             + model["activ_freq"][a]
+            #             + " times in one trace"
+            #     )
+            #     for a in model["activ_freq"].keys()
+            # ]
 
             # print(declare_model_discover(datamodel, table, (1 - threshold)))
             return render_template(
@@ -365,10 +365,11 @@ def discover():
                 pools=pools,
                 datamodels=datamodels,
                 tables=tables,
+                model = model,
                 text_model=text_model,
             )
     return render_template(
-        "discover.html", pools=pools, datamodels=datamodels, tables=tables, text_model=text_model
+        "discover.html", pools=pools, datamodels=datamodels, tables=tables,model = model, text_model=text_model
     )
 
 
@@ -389,6 +390,7 @@ def conformance():
     global datamodels
     global tables
     global model
+    print(model)
     # path = join(dirname(realpath(__file__)),'statis.json')
     # with open(path,'r') as j:
     #     statis = json.loads(j.read())
@@ -404,7 +406,6 @@ def conformance():
         global pools
         global datamodels
         global tables
-        global model
         data_handel(request)
 
         ## upload model
@@ -415,6 +416,7 @@ def conformance():
             model_file.save(file_path)
             with open(file_path,'r') as j:
                 model = json.loads(j.read())
+            print(model)
 
 
             return render_template("conformance.html", pools=pools, datamodels=datamodels, tables=tables, model=model)
@@ -446,7 +448,7 @@ def conformance():
 @app.route("/download", methods=["GET", "POST"])
 def download_model():
     global model
-
+    print(model)
     if request.method == "POST":
         if "model_name" in request.form:
             json_model = json.dumps(model)
