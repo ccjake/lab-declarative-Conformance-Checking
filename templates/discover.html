@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-    <title>Upload file</title>
+    <title>Model Discover</title>
     <link rel="icon" href="{{ url_for('static', filename='web_logo.png') }}">
     <script type="text/javascript" src="../static/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/vast-engineering/jquery-popup-overlay@2/jquery.popupoverlay.min.js"></script>
@@ -52,6 +52,8 @@
         <input type="submit" value="Discover" class="bigSub" id="discover" disabled>
     </form>
 
+    <button class="down_open" id="down_open">Save</button>
+
 </div>
 <div id="button_div" ; style="position: absolute;left: 200px;">
     <button class="rule_button" id='Equivalence'>Equivalence</button>
@@ -95,7 +97,7 @@
 
 
 <!--the add buttons for selec pool-->
-<section id="add_pool" class>
+<section id="add_pool">
     <h3>Add Pool</h3>
     <form method="POST">
         <input type="text" name="add_pool" required>
@@ -112,17 +114,28 @@
 </section>
 
 <section id="add_table">
-    <h2>Add Table</h2>
+    <h3>Add Table</h3>
     <form method="POST" enctype=multipart/form-data>
         <input type="file" name="add_table" id="to_add_table" required accept=".xes">
         <input type="submit" value="add table">
     </form>
 </section>
 
+
+<section id="down">
+    <h3>Model Name</h3>
+    <form method="POST" action="/download">
+        <input type="text" name="model_name" required>
+        <input type="submit" value="Save">
+    </form>
+</section>
+
+
 <script>
     $('#add_pool').popup();
     $('#add_datamodel').popup();
     $('#add_table').popup();
+    $('#down').popup();
 </script>
 
 
@@ -231,6 +244,7 @@
         $("#button_div").width(180)
 
         $(".rule_button").hide()
+
         {% if text_model %}
             $(".rule_button").show()
         {% endif %}

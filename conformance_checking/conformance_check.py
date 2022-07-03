@@ -18,25 +18,49 @@ def variant_table(datamodel, table: str):
     )
     pql.add(PQLColumn(name="freq", query='COUNT("' + table + '_CASES"."Case ID")'))
 
-    pql.add(PQLColumn(name="variant_id", query='MIN("' + table + '_CASES"."Case ID")'))
+    pql.add(PQLColumn(name="id", query='MIN("' + table + '_CASES"."Case ID")'))
     df = datamodel.get_data_frame(pql)
+    df.set_index('id',inplace = True)
 
-    ## for activities
-    pql = PQL()
-    pql.add(PQLColumn(name="activities", query='"' + table + '"."concept:name"'))
-    pql.add(PQLColumn(name="frequency", query='COUNT_TABLE("' + table + '")'))
+    # ## for activities
+    # pql = PQL()
+    # pql.add(PQLColumn(name="activities", query='"' + table + '"."concept:name"'))
+    # pql.add(PQLColumn(name="frequency", query='COUNT_TABLE("' + table + '")'))
+    #
+    # activities = sorted(datamodel.get_data_frame(pql)["activities"].tolist())
+    # activities = set(activities)
 
-    activities = sorted(datamodel.get_data_frame(pql)["activities"].tolist())
-    activities = set(activities)
-
-    return df, activities
+    return df
 
 
 def conformance_checking(datamodel, table: str, model):
 
     scc_df = stric_conformance(datamodel,table,model)
 
+    scc_df.set_index('id',inplace=True)
 
+    cols = scc_df.iloc[:,1:].columns
+
+    cc_dic = {}
+    for id in scc_df.index.values.tolist():
+        violations = []
+        fulfill = []
+        dic = {}
+        for con in cols:
+            if (scc_df.at[id, con] < 0):
+                violations.append(con)
+            if (scc_df.at[id, con] > 0):
+                fulfill.append(con)
+
+        dic['violations'] = violations
+        dic['fulfill'] = fulfill
+        activations = sum(scc_df.loc[id][1:].map(abs))
+        fulfills = sum(scc_df.loc[id][1:])
+        dev = activations - fulfills
+        dic['fitness'] = 1 - dev / activations
+        dic['activations'] = activations
+        dic['fit'] = (fulfill == activations)
+        cc_dic[id] = dic
 
 
 
