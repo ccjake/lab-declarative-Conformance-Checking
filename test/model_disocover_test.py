@@ -196,8 +196,8 @@ class TestModel(unittest.TestCase):
             self.assertEqual(pm4py_skeleton, pql_skeleton)
 
     def test_skeleton_discovery_with_noise(self):
-        # test_log = xes_importer.apply("../example_log/synthetic event log.xes")
-        test_log = xes_importer.apply("../example_log/example_log.xes")
+        test_log = xes_importer.apply("../example_log/synthetic event log.xes")
+        # test_log = xes_importer.apply("../example_log/example_log.xes")
         for i in range(0,10,2):
             noise = i/10
             pm4py_sekelton_model = lsk_discovery.apply(test_log,parameters={lsk_discovery.Variants.CLASSIC.value.Parameters.NOISE_THRESHOLD: noise})

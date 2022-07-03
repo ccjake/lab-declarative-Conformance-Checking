@@ -173,7 +173,7 @@ def directly_follows(datamodel, table: str, activities_df,noise_threshold):
     queries.add(case_id_query(table))
     for A in activities:
         for B in activities:
-            col_name = "never_together " + A + " TO " + B
+            col_name = "directly_followss " + A + " TO " + B
             query = (
                 "CASE WHEN PROCESS EQUALS '" + A + "' TO '" + B + "' THEN 1 ELSE 0 END"
             )
@@ -195,7 +195,6 @@ def activ_freq(datamodel, table: str, activities_df, noise_threshold):
     """
     activities = list(activities_df.index.values)
     queries = PQL()
-    # queries.add(case_id_query(table))
     queries.add(PQLColumn(name="trace", query="VARIANT(\"" + table + "\".\"concept:name\")"))
     queries.add(PQLColumn(name="frequency", query="COUNT(\"" + table + "_cases\".\"Case Id\")"))
     df = pd.DataFrame(datamodel.get_data_frame(queries))
