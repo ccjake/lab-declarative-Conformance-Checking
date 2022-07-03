@@ -9,12 +9,10 @@ from pm4py.objects.log.importer.xes import importer as xes_importer
 from pm4py import convert_to_dataframe
 from discovery.model_discover import declare_model_discover
 
-import pandas as pd
-
 from conformance_checking.conformance_check import conformance_checking
-from conformance_checking.conformance_check import variant_table
 
 import json
+
 app = Flask(__name__)
 
 # enable debugging mode
@@ -22,7 +20,7 @@ app.config["DEBUG"] = True
 
 # Uploads folder
 UPLOAD_FOLDER = join(dirname(realpath(__file__)), "static/Uploads/")
-TEMP = join(dirname(realpath(__file__)),'temp/')
+TEMP = join(dirname(realpath(__file__)), 'temp/')
 ALLOWED_EXTENSIONS = set(["xes"])
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -38,6 +36,7 @@ tables = {"aa": ["bb"]}
 # cn = Celonis_Connect()
 text_model = None
 model = None
+
 
 def allowed_file(filename):
     return "." in filename and filename.rsplit(".", 1)[1] in ALLOWED_EXTENSIONS
@@ -313,11 +312,11 @@ def discover():
             text_model = {}
             text_model["EquivalenceM"] = [
                 (
-                    "Activity '"
-                    + a
-                    + "' and activity '"
-                    + b
-                    + "' always occur with same frequency into a trace"
+                        "Activity '"
+                        + a
+                        + "' and activity '"
+                        + b
+                        + "' always occur with same frequency into a trace"
                 )
                 for (a, b) in model["equivalence"]
             ]
@@ -331,11 +330,11 @@ def discover():
             ]
             text_model["Never-togetherM"] = [
                 (
-                    "Activity '"
-                    + a
-                    + "' and activity '"
-                    + b
-                    + "' never occur in a same trace"
+                        "Activity '"
+                        + a
+                        + "' and activity '"
+                        + b
+                        + "' never occur in a same trace"
                 )
                 for (a, b) in model["never_together"]
             ]
@@ -346,16 +345,16 @@ def discover():
 
             for _ in model["activ_freq"].keys():
                 model["activ_freq"][_] = (
-                    "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
+                        "[" + ", ".join(map(str, model["activ_freq"][_])) + "]"
                 )
 
             text_model["OccurrencesM"] = [
                 (
-                    "Activity '"
-                    + a
-                    + "' can happen "
-                    + model["activ_freq"][a]
-                    + " times in one trace"
+                        "Activity '"
+                        + a
+                        + "' can happen "
+                        + model["activ_freq"][a]
+                        + " times in one trace"
                 )
                 for a in model["activ_freq"].keys()
             ]
@@ -373,12 +372,15 @@ def discover():
     )
 
 
-def read_json(jsonname):
-    path = join(dirname(realpath(__file__)),jsonname)
-    with open(path,'r') as j:
-        dic = json.loads(j.read())
-    return dic
-
+# def reaf read_json(jsonname):
+# #     path = join(dirname(realpath(__file__)),, jsonname)
+# #     with open(path, 'r') as j:
+# #         dic = json.loads(j.read())
+# #     return dicd_json(jsonname):
+#     path = join(dirname(realpath(__file__)),, jsonname)
+#     with open(path, 'r') as j:
+#         dic = json.loads(j.read())
+#     return dic
 
 
 @app.route("/conformance_checking", methods=["GET", "POST"])
@@ -387,75 +389,75 @@ def conformance():
     global datamodels
     global tables
     global model
-    path = join(dirname(realpath(__file__)),'statis.json')
-    with open(path,'r') as j:
-        statis = json.loads(j.read())
+    # path = join(dirname(realpath(__file__)),'statis.json')
+    # with open(path,'r') as j:
+    #     statis = json.loads(j.read())
 
-    path = join(dirname(realpath(__file__)),'con.json')
-    with open(path,'r') as j:
-        conf = json.loads(j.read())
+    # path = join(dirname(realpath(__file__)),'c.json')
+    # with open(path,'r') as j:
+    #     conf = json.loads(j.read())
     # conf = json.loads("/Users/baichaoye/PycharmProjects/lab-declarative-Conformance-Checking/con.json")
     # print(model)
-
 
     if request.method == "POST":
         global cn
         global pools
         global datamodels
         global tables
-
+        global model
         data_handel(request)
 
         ## upload model
         if 'model_name' in request.files:
             model_file = request.files['model_name']
             model_name = secure_filename(model_file.filename)
-            file_path = TEMP+model_name
+            file_path = TEMP + model_name
             model_file.save(file_path)
-            model = read_json(model_name)
+            with open(file_path,'r') as j:
+                model = json.loads(j.read())
+
 
             return render_template("conformance.html", pools=pools, datamodels=datamodels, tables=tables, model=model)
-
 
         if "table_discover" in request.form:
             table = request.form["table_discover"]
             datamodel_name = request.form["datamodel_discover"]
             datamodel = cn.c.datamodels.find(datamodel_name)
-            conf,statis = conformance_checking(datamodel,table,model)
-            d = json.dumps(conf)
-            path = join(dirname(realpath(__file__)), 'con.json')
-            g = open(path, 'w')
-            g.write(d)
-            g.close()
+            conf, statis = conformance_checking(datamodel, table, model)
+            # d = json.dumps(conf)
+            # path = join(dirname(realpath(__file__)), 'con.json')
+            # g = open(path, 'w')
+            # g.write(d)
+            # g.close()
+            #
+            # d = json.dumps(statis)
+            # path = join(dirname(realpath(__file__)), 'statis.json')
+            # g = open(path, 'w')
+            # g.write(d)
+            # g.close()
 
-            d = json.dumps(statis)
-            path = join(dirname(realpath(__file__)), 'statis.json')
-            g = open(path, 'w')
-            g.write(d)
-            g.close()
-
-            return render_template("conformance.html",pools=pools, datamodels=datamodels, tables=tables,model = model,conf = conf,statis=statis)
-
-
+            return render_template("conformance.html", pools=pools, datamodels=datamodels, tables=tables, model=model,
+                                   conf=conf, statis=statis)
 
     return render_template(
-        "conformance.html", pools=pools, datamodels=datamodels, tables=tables,model = model,conf = conf,statis=statis
-    )
+        "conformance.html", pools=pools, datamodels=datamodels, tables=tables)
 
-@app.route("/download",methods=["GET", "POST"])
+
+@app.route("/download", methods=["GET", "POST"])
 def download_model():
     global model
 
     if request.method == "POST":
         if "model_name" in request.form:
+            json_model = json.dumps(model)
             name = request.form["model_name"]
             dp = join(dirname(realpath(__file__)), "static/")
-            f2 = open((dp+name+'.json'),'w')
-            f2.write(model)
+            f2 = open((dp + name + '.json'), 'w')
+            f2.write(json_model)
             f2.close()
 
-
     return redirect("/discover")
-if __name__ == "__main__":
 
+
+if __name__ == "__main__":
     app.run(port=5000)

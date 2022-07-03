@@ -269,47 +269,49 @@
         $('body').height($(window).height())
         $('.add_data').width(100)
         $("#trace_dis").jScrollPane()
+        $("#right_div").jScrollPane()
         {% if model %}
             $('#check').prop('disabled', false)
         {% endif %}
 
-        {% for id in conf.keys() %}
-            {% for l in conf[id]['fulfill'] %}
-                $("#{{ id }}.confor_div{{ loop.index0 }}").click(function (){
-                $("#right_div").empty()
-                {% for i in l.keys() %}
-                {% for j in l[i][1] %}
-                    {% if loop.index0 in l[i][0] %}
-                        $("#right_div").append('<div class="right_sub_div" style="background-color: lightgreen">{{ j }} </div>')
-                    {% else %}
-                        $("#right_div").append('<div class="right_sub_div" style="background-color: gray">{{ j }}</div>')
-                    {% endif %}
+        {% if conf %}
+            {% for id in conf.keys() %}
+                {% for l in conf[id]['fulfill'] %}
+                    $("#{{ id }}.confor_div{{ loop.index0 }}").click(function () {
+                        $("#right_div").empty()
+                        {% for i in l.keys() %}
+                            {% for j in l[i][1] %}
+                                {% if loop.index0 in l[i][0] %}
+                                    $("#right_div").append('<div class="right_sub_div" style="background-color: lightgreen">{{ j }} </div>')
+                                {% else %}
+                                    $("#right_div").append('<div class="right_sub_div" style="background-color: gray">{{ j }}</div>')
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+
+                    })
                 {% endfor %}
             {% endfor %}
 
-        })
-        {% endfor %}
-        {% endfor %}
 
+            {% for id in conf.keys() %}
+                {% for l in conf[id]['violations'] %}
+                    $("#{{ id }}.confor_div{{ loop.index0 }}").click(function () {
+                        $("#right_div").empty()
+                        {% for i in l.keys() %}
+                            {% for j in l[i][1] %}
+                                {% if loop.index0 in l[i][0] %}
+                                    $("#right_div").append('<div class="right_sub_div" style="background-color: red">{{ j }} </div>')
+                                {% else %}
+                                    $("#right_div").append('<div class="right_sub_div" style="background-color: gray">{{ j }}</div>')
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
 
-        {% for id in conf.keys() %}
-            {% for l in conf[id]['violations'] %}
-                $("#{{ id }}.confor_div{{ loop.index0 }}").click(function (){
-                $("#right_div").empty()
-                {% for i in l.keys() %}
-                {% for j in l[i][1] %}
-                    {% if loop.index0 in l[i][0] %}
-                        $("#right_div").append('<div class="right_sub_div" style="background-color: red">{{ j }} </div>')
-                    {% else %}
-                        $("#right_div").append('<div class="right_sub_div" style="background-color: gray">{{ j }}</div>')
-                    {% endif %}
+                    })
                 {% endfor %}
             {% endfor %}
-
-        })
-        {% endfor %}
-        {% endfor %}
-
+        {% endif %}
 
     })
 </script>

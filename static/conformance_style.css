@@ -211,8 +211,9 @@ select {
     position: absolute;
     left: 1200px;
     top: 50px;
-    height: 800px;
+    height: 600px;
     width: 400px;
+    overflow: hidden;
 }
 
 #statis_div {
