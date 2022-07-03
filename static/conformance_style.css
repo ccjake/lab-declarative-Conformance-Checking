@@ -7,8 +7,7 @@ body {
 }
 
 
-
-.select{
+.select {
     width: 180px;
     height: 180px;
     /*height: 500px;*/
@@ -18,53 +17,54 @@ body {
     text-decoration: none;
     margin-left: auto;
     margin-right: auto;
-    text-align:center;
+    text-align: center;
     vertical-align: top;
     position: absolute;
-    top:800px;
+    top: 800px;
 
 }
-.select_div{
+
+.select_div {
     border: 1px solid black;
-    text-align:center;
+    text-align: center;
     position: relative;
 }
 
-#select_div{
+#select_div {
     position: absolute;
     width: 200px;
     height: 10000px;
 }
 
-.select_url{
+.select_url {
     text-decoration: none;
     width: 150px;
     height: 150px;
 
 }
 
-.login{
+.login {
     position: relative;
-    text-align:center;
+    text-align: center;
 }
 
-.login_table{
+.login_table {
     display: inline-block;
     position: relative;
-    text-align:center;
+    text-align: center;
 }
 
 
 .popup_content {
 
-  margin: 10px;
-  padding: 15px;
-  max-width: 60%;
-  border: 2px solid #444;
-  background: burlywood;
+    margin: 10px;
+    padding: 15px;
+    max-width: 60%;
+    border: 2px solid #444;
+    background: burlywood;
 }
 
-.bigSub{
+.bigSub {
     /*offset: 10px 80px;*/
     background-color: royalblue;
     height: 100px;
@@ -76,18 +76,17 @@ body {
 }
 
 
-h3{
+h3 {
     color: teal;
 }
 
-h4{
+h4 {
     color: teal;
     margin: 0px;
 }
 
 
-
-.model_div{
+.model_div {
     height: 800px;
     width: 800px;
     position: absolute;
@@ -95,15 +94,16 @@ h4{
     overflow: auto;
 }
 
-select{
+select {
     margin: 5px;
     width: 150px;
     height: 25px;
     position: relative;
-    left:15px;
+    left: 15px;
 
 }
-.rule_button{
+
+.rule_button {
     /*display: inline-block;*/
     /*vertical-align:middle;*/
     /*text-align: center;*/
@@ -116,24 +116,134 @@ select{
     background-color: lightgreen;
 }
 
-.add_data{
+.add_data {
     position: relative;
     top: 5px;
     left: 20px;
 }
 
-#conformance_button{
+#conformance_button {
     position: relative;
     top: -40px;
 }
 
 
-#upload_open{
+#upload_open {
     position: relative;
     border: 2px solid red;
     width: 100px;
     height: 30px;
     top: 140px;
-    left:45px
+    left: 45px
 }
 
+
+.circle_red {
+    width: 15px;
+    height: 15px;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    background: red;
+
+}
+
+.circle_green {
+    width: 15px;
+    height: 15px;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    background: lightgreen;
+
+}
+
+.circle_gray {
+    width: 15px;
+    height: 15px;
+    -webkit-border-radius: 15px;
+    -moz-border-radius: 15px;
+    border-radius: 15px;
+    background: gray;
+}
+
+
+#up_open {
+    position: absolute;
+    border: 2px solid red;
+    width: 100px;
+    height: 30px;
+    top: 630px;
+    left: 40px
+}
+
+.confor_div {
+    height: 20px;
+    width: 900px;
+    background-color: white;
+    margin-top: 10px;
+    position: static;
+}
+
+#trace_dis {
+    background-color: white;
+    position: absolute;
+    left: 230px;
+    top: 180px;
+    width: 900px;
+    height: 600px;
+    overflow: hidden;
+    border: 2px solid  darkturquoise;
+
+}
+
+
+#top_div {
+    position: absolute;
+    top: 0px;
+    width: 900px;
+    height: 150px;
+    left: 230px;
+}
+
+
+#right_div {
+    position: absolute;
+    left: 1200px;
+    top: 50px;
+    height: 800px;
+    width: 400px;
+}
+
+#statis_div {
+    position: absolute;
+    left:700px;
+    height: 150px;
+    width: 150px;
+    top: 20px;
+}
+
+
+.trace_det{
+    width: 900px;
+    position: relative;
+    margin-top: 20px;
+    max-height: 2000px;
+}
+
+.circle{
+    margin-left: 20px;
+}
+
+
+.right_sub_div{
+    width: 350px;
+    height:120px;
+    margin: 20px;
+    position: static;
+    left:0;
+    text-align: center;
+    font-size: xx-large;
+    line-height: 120px;
+
+}

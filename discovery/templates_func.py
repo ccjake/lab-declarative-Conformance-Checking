@@ -222,7 +222,7 @@ def activ_freq(datamodel, table: str, activities_df, noise_threshold):
             if (threshold < log_traces * (1 - noise_threshold)):
                 continue
             else:
-                activ_freq[activity] = set(freq_list)
+                activ_freq[activity] = list(set(freq_list))
                 break
 
     return activ_freq

@@ -131,10 +131,12 @@ select{
 
 
 #down_open{
-    position: relative;
+    position: absolute;
     border: 2px solid red;
     width: 100px;
     height: 30px;
-    top: 140px;
-    left:45px
+    top: 630px;
+    left:40px
 }
+
+

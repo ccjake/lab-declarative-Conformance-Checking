@@ -1,12 +1,15 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import os
 from os.path import join, dirname, realpath
+import shutil
 from celonis_connect import Celonis_Connect
 from werkzeug.utils import secure_filename
 
 from pm4py.objects.log.importer.xes import importer as xes_importer
 from pm4py import convert_to_dataframe
 from discovery.model_discover import declare_model_discover
+
+import pandas as pd
 
 from conformance_checking.conformance_check import conformance_checking
 from conformance_checking.conformance_check import variant_table
@@ -19,6 +22,7 @@ app.config["DEBUG"] = True
 
 # Uploads folder
 UPLOAD_FOLDER = join(dirname(realpath(__file__)), "static/Uploads/")
+TEMP = join(dirname(realpath(__file__)),'temp/')
 ALLOWED_EXTENSIONS = set(["xes"])
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
@@ -41,6 +45,9 @@ def allowed_file(filename):
 
 @app.route("/", methods=["POST", "GET"])
 def login_celonis():
+    dp = join(dirname(realpath(__file__)), 'temp')
+    shutil.rmtree(dp)
+    os.mkdir(dp)
     global result
     global cn
     if request.method == "POST":
@@ -366,43 +373,89 @@ def discover():
     )
 
 
+def read_json(jsonname):
+    path = join(dirname(realpath(__file__)),jsonname)
+    with open(path,'r') as j:
+        dic = json.loads(j.read())
+    return dic
+
+
+
 @app.route("/conformance_checking", methods=["GET", "POST"])
 def conformance():
     global pools
     global datamodels
     global tables
+    global model
+    path = join(dirname(realpath(__file__)),'statis.json')
+    with open(path,'r') as j:
+        statis = json.loads(j.read())
+
+    path = join(dirname(realpath(__file__)),'con.json')
+    with open(path,'r') as j:
+        conf = json.loads(j.read())
+    # conf = json.loads("/Users/baichaoye/PycharmProjects/lab-declarative-Conformance-Checking/con.json")
+    # print(model)
+
+
     if request.method == "POST":
         global cn
         global pools
         global datamodels
         global tables
 
-        ## add pool
         data_handel(request)
 
+        ## upload model
+        if 'model_name' in request.files:
+            model_file = request.files['model_name']
+            model_name = secure_filename(model_file.filename)
+            file_path = TEMP+model_name
+            model_file.save(file_path)
+            model = read_json(model_name)
+
+            return render_template("conformance.html", pools=pools, datamodels=datamodels, tables=tables, model=model)
+
+
+        if "table_discover" in request.form:
+            table = request.form["table_discover"]
+            datamodel_name = request.form["datamodel_discover"]
+            datamodel = cn.c.datamodels.find(datamodel_name)
+            conf,statis = conformance_checking(datamodel,table,model)
+            d = json.dumps(conf)
+            path = join(dirname(realpath(__file__)), 'con.json')
+            g = open(path, 'w')
+            g.write(d)
+            g.close()
+
+            d = json.dumps(statis)
+            path = join(dirname(realpath(__file__)), 'statis.json')
+            g = open(path, 'w')
+            g.write(d)
+            g.close()
+
+            return render_template("conformance.html",pools=pools, datamodels=datamodels, tables=tables,model = model,conf = conf,statis=statis)
 
 
 
     return render_template(
-        "conformance.html", pools=pools, datamodels=datamodels, tables=tables
+        "conformance.html", pools=pools, datamodels=datamodels, tables=tables,model = model,conf = conf,statis=statis
     )
 
 @app.route("/download",methods=["GET", "POST"])
 def download_model():
     global model
-    b = json.dumps(model)
-    print()
-    print()
+
     if request.method == "POST":
         if "model_name" in request.form:
-            print("dsds")
             name = request.form["model_name"]
             dp = join(dirname(realpath(__file__)), "static/")
             f2 = open((dp+name+'.json'),'w')
-            f2.write(b)
+            f2.write(model)
             f2.close()
 
 
     return redirect("/discover")
 if __name__ == "__main__":
+
     app.run(port=5000)
