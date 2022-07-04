@@ -299,11 +299,13 @@ def conformance():
     global datamodels
     global tables
     global model
-    print(model)
+    global cn
+    if (cn == "no connection"):
+        return redirect("/")
 
 
     if request.method == "POST":
-        global cn
+
         global pools
         global datamodels
         global tables

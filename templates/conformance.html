@@ -71,12 +71,11 @@
 
     </div>
 {% endif %}
+
 <div id="right_div">
 
 
 </div>
-
-
 <div style="" id="trace_dis">
     {% if conf %}
         {% for id in conf.keys() %}
@@ -269,7 +268,7 @@
         $('body').height($(window).height())
         $('.add_data').width(100)
         $("#trace_dis").jScrollPane()
-        $("#right_div").jScrollPane()
+        $("#right_div_out").jScrollPane()
         {% if model %}
             $('#check').prop('disabled', false)
         {% endif %}
@@ -307,7 +306,6 @@
                                 {% endif %}
                             {% endfor %}
                         {% endfor %}
-
                     })
                 {% endfor %}
             {% endfor %}

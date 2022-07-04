@@ -207,14 +207,26 @@ select {
 }
 
 
-#right_div {
+
+/*#right_div_out {*/
+/*    position: absolute;*/
+/*    left: 1200px;*/
+/*    top: 50px;*/
+/*    height: 600px;*/
+/*    width: 400px;*/
+/*    overflow: hidden;*/
+/*}*/
+
+#right_div{
     position: absolute;
     left: 1200px;
     top: 50px;
     height: 600px;
     width: 400px;
-    overflow: hidden;
+    overflow-y: auto;
+
 }
+
 
 #statis_div {
     position: absolute;
