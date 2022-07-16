@@ -45,7 +45,8 @@ def allowed_file(filename):
 @app.route("/", methods=["POST", "GET"])
 def login_celonis():
     dp = join(dirname(realpath(__file__)), 'temp')
-    shutil.rmtree(dp)
+    if os.path.exists(dp):
+        shutil.rmtree(dp)
     os.mkdir(dp)
     global result
     global cn
