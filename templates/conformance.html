@@ -92,7 +92,7 @@
                     <div class="confor_div{{ loop.index0 }} confor_div" id="{{ id }}">
                         {% for i in l.keys() %}
                             <span style="display: inline-block;max-width: 340px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;background-color: yellow">{{ i }} :</span>
-                            <span class="trace_span">
+                                <span class="trace_span">
                             {% for j in l[i][1] %}
                                 {% if loop.index0 in l[i][0] %}
                                     <span class="circle_green circle">&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -269,9 +269,10 @@
 
         $('body').height($(window).height())
         $('.add_data').width(100)
-        $("#trace_dis").jScrollPane()
-        {#$(".confor_div").jScrollPane()#}
+        $("#trace_dis")
+        $(".confor_div").jScrollPane()
         $("#right_div_out").jScrollPane()
+
         {% if model %}
             $('#check').prop('disabled', false)
         {% endif %}

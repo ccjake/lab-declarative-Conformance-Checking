@@ -372,9 +372,9 @@ def conformance():
                 conf=conf,
                 statis=statis,
             )
-    with open("/Users/baichaoye/PycharmProjects/lab-declarative-Conformance-Checking/conf.json", "r") as j:
+    with open(r"C:\Users\96513\PycharmProjects\lab-declarative-Conformance-Checking\conf.json","r") as j:
         conf = json.loads(j.read())
-    with open("/Users/baichaoye/PycharmProjects/lab-declarative-Conformance-Checking/statics.json", "r") as s:
+    with open(r"C:\Users\96513\PycharmProjects\lab-declarative-Conformance-Checking\statics.json","r") as s:
         statis =json.loads(s.read())
     return render_template(
         "conformance.html", pools=pools, datamodels=datamodels, tables=tables,conf = conf,statis=statis
