@@ -214,11 +214,14 @@ def activ_freq(datamodel, table: str, activities_df, noise_threshold):
                 freq_number[freq] += df.loc[trace, "frequency"]
         threshold = 0
         freq_list = []
-        numer_freq = dict(zip(freq_number.values(), freq_number.keys()))
+        numer_freq = []
+        for freq in freq_number.keys():
+            numer_freq.append((freq_number[freq],freq))
+        numer_freq.sort(key=lambda tup:tup[0],reverse=True)
 
-        for key in sorted(list(numer_freq.keys()), reverse=True):
-            threshold += key
-            freq_list.append(numer_freq[key])
+        for (traces,freq) in numer_freq:
+            threshold += traces
+            freq_list.append(freq)
             if (threshold < log_traces * (1 - noise_threshold)):
                 continue
             else:

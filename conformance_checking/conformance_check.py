@@ -35,14 +35,17 @@ def conformance_checking(datamodel, table: str, model):
 def get_act_order(acties, con, l):
 
     if ("not_in_model" in con):
+        # event not in model
         s = []
         for i in range(len(acties)):
             if acties[i] not in l:
                 s.append(i)
         return s
     elif ("never_together" in con):
-        b = con.split(' ')[-1]
-        a = con.split(' ')[-3]
+        ## two events never together
+        a = con.split(' TO ')[-2]
+        b = con.split(' TO ')[-1]
+        a = a.split(' ',1)[1]
         if (a in acties and b in acties):
             return [acties.index(a), acties.index(b)]
         elif (a in acties):
@@ -50,11 +53,16 @@ def get_act_order(acties, con, l):
         else:
             return [acties.index(b)]
     elif ('TO' not in con):
-        a = con.split('_')[0]
+        a = con.rsplit('_')[0]
         return [i for i, x in enumerate(acties) if x == a]
     else:
-        b = con.split(' ')[-1]
-        a = con.split(' ')[-3]
+        # b = con.split(' ')[-1]
+        # a = con.split(' ')[-3]
+        a_b = con.split(" TO ")
+        a = a_b[-2]
+        a = a.split(" ", 1)[1]
+        b = a_b[-1]
+
         return [acties.index(a), acties.index(b)]
 
 
