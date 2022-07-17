@@ -105,10 +105,11 @@
                         {% endfor %}
                     </div>
                 {% endfor %}
-                {% for l in conf[id]['v'] %}
-                    <div class="violations">
+                {% for l in conf[id]['violations'] %}
+                    <div class="confor_div{{ loop.index0 }} confor_div" id="{{ id }}">
                         {% for i in l.keys() %}
-                            {{ i }} :
+                            <span style="display: inline-block;max-width: 340px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;background-color: yellow">{{ i }} :</span>
+                                <span class="trace_span">
                             {% for j in l[i][1] %}
                                 {% if loop.index0 in l[i][0] %}
                                     <span class="circle_red circle">&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -117,9 +118,11 @@
                                 {% endif %}
 
                             {% endfor %}
+                            </span>
                         {% endfor %}
                     </div>
                 {% endfor %}
+
 
             </details>
         {% endfor %}

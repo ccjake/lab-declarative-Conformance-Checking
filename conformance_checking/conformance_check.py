@@ -6,7 +6,6 @@ from pycelonis.celonis_api.pql.pql import PQL, PQLColumn, PQLFilter
 
 def variant_table(datamodel, table: str):
     """
-
     @param datamode: the datamodel in celonis
     @param table: the selected table in celonis
     @return: the variant table(dataframe) for different traces, and the activities list
@@ -28,8 +27,8 @@ def variant_table(datamodel, table: str):
 def conformance_checking(datamodel, table: str, model):
     scc_df = stric_conformance(datamodel, table, model)
     v_df = variant_table(datamodel, table)
-
-    return conf_df_to_dics(scc_df, v_df)
+    l = list(model['activ_freq'].keys())
+    return conf_df_to_dics(scc_df, v_df,l)
 
 
 def get_act_order(acties, con, l):
@@ -56,21 +55,23 @@ def get_act_order(acties, con, l):
         a = con.rsplit('_')[0]
         return [i for i, x in enumerate(acties) if x == a]
     else:
-        # b = con.split(' ')[-1]
-        # a = con.split(' ')[-3]
         a_b = con.split(" TO ")
         a = a_b[-2]
         a = a.split(" ", 1)[1]
         b = a_b[-1]
+        if (a in acties and b in acties):
+            return [acties.index(a), acties.index(b)]
+        elif (a in acties):
+            return [acties.index(a)]
+        else:
+            return [acties.index(b)]
 
-        return [acties.index(a), acties.index(b)]
 
-
-def conf_df_to_dics(con_df, v_df):
+def conf_df_to_dics(con_df, v_df,l):
     scc_df = con_df.set_index('id')
     cols = scc_df.iloc[:, 1:].columns
 
-    l = set([l.strip() for l in ','.join(v_df['variant']).split(',')])
+    # l = set([l.strip() for l in ','.join(v_df['variant']).split(',')])
 
     sum_trace = int(sum(v_df['freq']))
     fulfill_trace = 0
@@ -83,7 +84,7 @@ def conf_df_to_dics(con_df, v_df):
         dic['variant'] = acties
         for con in cols:
             if (scc_df.at[id, con] < 0):
-                violations.append({con: sorted(get_act_order(acties, con, l))})
+                violations.append({con: (sorted(get_act_order(acties, con, l)),acties)})
             if (scc_df.at[id, con] > 0):
                 fulfill.append({con: (sorted(get_act_order(acties, con, l)), acties)})
         if (len(violations) == 0):
@@ -111,7 +112,7 @@ def stric_conformance(datamodel, table, model):
 
     select_id = str("','".join(v_df.index.values.tolist()))
     filter_query = (
-            'FILTER DOMAIN "'+ table+'"."Case ID" IN ( \''
+            'FILTER DOMAIN "'+ table+'_CASES"."Case ID" IN ( \''
             + select_id
             + "' )"
     )

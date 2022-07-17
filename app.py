@@ -12,6 +12,8 @@ from discovery.model_discover import declare_model_discover
 from conformance_checking.conformance_check import conformance_checking
 
 import json
+from memory_profiler import profile
+
 
 app = Flask(__name__)
 
@@ -241,7 +243,7 @@ def discover():
             table = request.form["table_discover"]
             datamodel_name = request.form["datamodel_discover"]
             datamodel = cn.c.datamodels.find(datamodel_name)
-            threshold = int(request.form["threshold"])
+            threshold = float(request.form["threshold"])
             model = declare_model_discover(datamodel, table, (1 - threshold))
             print(model)
             text_model = {}
@@ -320,8 +322,8 @@ def conformance():
     global tables
     global model
     global cn
-    # if cn == "no connection":
-    #     return redirect("/")
+    if cn == "no connection":
+        return redirect("/")
 
     if request.method == "POST":
 
@@ -372,12 +374,12 @@ def conformance():
                 conf=conf,
                 statis=statis,
             )
-    with open(r"C:\Users\96513\PycharmProjects\lab-declarative-Conformance-Checking\conf.json","r") as j:
-        conf = json.loads(j.read())
-    with open(r"C:\Users\96513\PycharmProjects\lab-declarative-Conformance-Checking\statics.json","r") as s:
-        statis =json.loads(s.read())
+    # with open(r"C:\Users\96513\PycharmProjects\lab-declarative-Conformance-Checking\conf.json","r") as j:
+    #     conf = json.loads(j.read())
+    # with open(r"C:\Users\96513\PycharmProjects\lab-declarative-Conformance-Checking\statics.json","r") as s:
+    #     statis =json.loads(s.read())
     return render_template(
-        "conformance.html", pools=pools, datamodels=datamodels, tables=tables,conf = conf,statis=statis
+        "conformance.html", pools=pools, datamodels=datamodels, tables=tables
     )
 
 

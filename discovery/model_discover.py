@@ -21,7 +21,7 @@ def declare_model_discover(datamodel, table: str, noise_threshold = 0.0):
     )
     activities_df = datamodel.get_data_frame(activities_query)
     # event_sum = sum(activities_df['frequency'])
-    # activities_df = activities_df[activities_df['frequency'] >= event_sum / 100]
+    # activities_df = activities_df[activities_df['frequency'] >= event_sum / 500]
     activities_df.set_index("activities", inplace=True)
 
     templates = [
