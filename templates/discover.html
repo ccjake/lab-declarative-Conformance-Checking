@@ -46,9 +46,9 @@
     <br>
     <br>
     <br>
-    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Threshold</h4>
+    <h4>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Threshold&nbsp;&nbsp;<span id = 'thresvalue'>1</span></h4>
     <form method="POST" >
-        <input type="range" id="threshold"  name="threshold" min='0' max='1' step='0.01' value="1"><br>
+        <input type="range" id="threshold"  name="threshold" min='0' max='1' step='0.01' value="1"  oninput="this.nextElementSibling.value = this.value"><br>
         <input type="submit" value="Discover" class="bigSub" id="discover" disabled>
     </form>
 
@@ -236,6 +236,8 @@
         $('#threshold').offset({
             left: 20
         })
+
+
         $("#model_div").jScrollPane();
         $("#model_div").offset({
             top: 40,
@@ -262,6 +264,10 @@
             {#console.log("nmd")#}
         })
 
+        $('#threshold').on('input',function (){
+            $('#thresvalue').html(this.value);
+        })
+
         $('#Equivalence').click()
 
 
@@ -272,6 +278,7 @@
 
 
     })
+
 </script>
 
 </body>

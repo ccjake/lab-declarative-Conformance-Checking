@@ -72,14 +72,14 @@
     </div>
 {% endif %}
 
-<div id="right_div">
+<div id="right_div" >
 
 
 </div>
 <div style="" id="trace_dis">
     {% if conf %}
         {% for id in conf.keys() %}
-            <details class="trace_det" open>
+            <details class="trace_det">
                 <summary style="height: 70px;">
                     CASE ID:{{ id }}
                     <hr>
@@ -91,7 +91,8 @@
                 {% for l in conf[id]['fulfill'] %}
                     <div class="confor_div{{ loop.index0 }} confor_div" id="{{ id }}">
                         {% for i in l.keys() %}
-                            {{ i }} :
+                            <span style="display: inline-block;max-width: 340px;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;background-color: yellow">{{ i }} :</span>
+                            <span class="trace_span">
                             {% for j in l[i][1] %}
                                 {% if loop.index0 in l[i][0] %}
                                     <span class="circle_green circle">&nbsp;&nbsp;&nbsp;&nbsp;</span>
@@ -100,6 +101,7 @@
                                 {% endif %}
 
                             {% endfor %}
+                            </span>
                         {% endfor %}
                     </div>
                 {% endfor %}
@@ -268,6 +270,7 @@
         $('body').height($(window).height())
         $('.add_data').width(100)
         $("#trace_dis").jScrollPane()
+        {#$(".confor_div").jScrollPane()#}
         $("#right_div_out").jScrollPane()
         {% if model %}
             $('#check').prop('disabled', false)

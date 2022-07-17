@@ -320,8 +320,8 @@ def conformance():
     global tables
     global model
     global cn
-    if cn == "no connection":
-        return redirect("/")
+    # if cn == "no connection":
+    #     return redirect("/")
 
     if request.method == "POST":
 
@@ -354,7 +354,15 @@ def conformance():
             datamodel_name = request.form["datamodel_discover"]
             datamodel = cn.c.datamodels.find(datamodel_name)
             conf, statis = conformance_checking(datamodel, table, model)
-
+            # j_c = json.dumps(conf)
+            # j_s = json.dumps(statis)
+            # TEMP = join(dirname(realpath(__file__)), "temp/")
+            # f2 = open((TEMP  + "conf.json"), "w")
+            # f2.write(j_c)
+            # f2.close()
+            # f2 = open((TEMP  + "statics.json"), "w")
+            # f2.write(j_s)
+            # f2.close()
             return render_template(
                 "conformance.html",
                 pools=pools,
@@ -364,9 +372,12 @@ def conformance():
                 conf=conf,
                 statis=statis,
             )
-
+    with open("/Users/baichaoye/PycharmProjects/lab-declarative-Conformance-Checking/conf.json", "r") as j:
+        conf = json.loads(j.read())
+    with open("/Users/baichaoye/PycharmProjects/lab-declarative-Conformance-Checking/statics.json", "r") as s:
+        statis =json.loads(s.read())
     return render_template(
-        "conformance.html", pools=pools, datamodels=datamodels, tables=tables
+        "conformance.html", pools=pools, datamodels=datamodels, tables=tables,conf = conf,statis=statis
     )
 
 

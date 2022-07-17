@@ -192,8 +192,9 @@ select {
     top: 180px;
     width: 900px;
     height: 600px;
-    overflow: hidden;
-    border: 2px solid  darkturquoise;
+    overflow: auto;
+    /*overflow-x: hidden;*/
+    border: 2px solid darkturquoise;
 
 }
 
@@ -207,7 +208,6 @@ select {
 }
 
 
-
 /*#right_div_out {*/
 /*    position: absolute;*/
 /*    left: 1200px;*/
@@ -217,7 +217,7 @@ select {
 /*    overflow: hidden;*/
 /*}*/
 
-#right_div{
+#right_div {
     position: absolute;
     left: 1200px;
     top: 50px;
@@ -230,31 +230,39 @@ select {
 
 #statis_div {
     position: absolute;
-    left:700px;
+    left: 700px;
     height: 150px;
     width: 150px;
     top: 20px;
 }
 
 
-.trace_det{
+.trace_det {
     width: 900px;
     position: relative;
     margin-top: 20px;
     max-height: 2000px;
+    max-width: 400px;
+    overflow: auto;
 }
 
-.circle{
+.trace_span {
+    position: absolute;
+    left: 350px;
+    max-width: 20000px
+}
+
+.circle {
     margin-left: 20px;
 }
 
 
-.right_sub_div{
+.right_sub_div {
     width: 350px;
-    height:120px;
+    height: 120px;
     margin: 20px;
     position: static;
-    left:0;
+    left: 0;
     text-align: center;
     font-size: xx-large;
     line-height: 120px;
