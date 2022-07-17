@@ -248,7 +248,8 @@ def pql_table_to_relation(pql_df, activities_df,noise_threshold):
     activities = list(activities_df.index.values)
     activities.sort()
     for col in colums:
-        A = col.split(" ")[-3]
+        A = col.split(" TO ")[-2]
+        A = A.split(" ",1)[1]
         su = pql_df[col].sum()
         if su < activities_df.loc[A, "frequency"] * (1-noise_threshold):
             remove_list.append(col)
@@ -256,13 +257,17 @@ def pql_table_to_relation(pql_df, activities_df,noise_threshold):
 
     supported_templates = pruned_df.columns.values.tolist()[1:]
     for t in supported_templates:
-        A_B = t.split(" ")
-        A = A_B[-3]
+        A_B = t.split(" TO ")
+        A = A_B[-2]
+        A = A.split(" ", 1)[1]
         B = A_B[-1]
         template_list.append((A, B))
 
     template_list.sort()
     return template_list
+
+# def freqs(pql_df, activities_df):
+
 
 
 template_func_dict = {

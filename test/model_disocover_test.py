@@ -22,13 +22,13 @@ class TestModel(unittest.TestCase):
     def setUpClass(cls):
         cls.cn = Celonis_Connect()
 
-        # cls.pm4py_sekelton_model = cls.setTestLog("../example_log/synthetic event log.xes")
-        # cls.cn.set_datamodel("synthetic")
-        # cls.cn.set_table("synthetic_event_log_xes")
+        cls.pm4py_sekelton_model = cls.setTestLog("../example_log/synthetic event log.xes")
+        cls.cn.set_datamodel("synthetic")
+        cls.cn.set_table("synthetic_event_log_xes")
 
-        cls.pm4py_sekelton_model = cls.setTestLog("../example_log/example_log.xes")
-        cls.cn.set_datamodel("rum_example")
-        cls.cn.set_table("example_log_xes")
+        # cls.pm4py_sekelton_model = cls.setTestLog("../example_log/example_log.xes")
+        # cls.cn.set_datamodel("rum_example")
+        # cls.cn.set_table("example_log_xes")
 
         cls.datamodel = cls.cn.get_datamodel()
         cls.table_name = cls.cn.get_table().name
@@ -162,6 +162,9 @@ class TestModel(unittest.TestCase):
         # print(pql_skeleton)
         # print("---")
         # print(self.pm4py_sekelton_model)
+        if 'freqs' in pql_skeleton.keys():
+            del pql_skeleton['freqs']
+
         self.assertDictEqual(self.pm4py_sekelton_model,pql_skeleton)
 
 

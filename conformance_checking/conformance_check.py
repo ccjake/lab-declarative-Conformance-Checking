@@ -33,7 +33,6 @@ def conformance_checking(datamodel, table: str, model):
 
 
 def get_act_order(acties, con, l):
-    #     al = [a.strip() for a in  acties.split(',')]
 
     if ("not_in_model" in con):
         s = []
