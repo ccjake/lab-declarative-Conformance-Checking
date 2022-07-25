@@ -90,6 +90,11 @@ def select():
 
 
 def data_handel(request):
+
+    '''
+    Called when add a new table
+    @return: render_template obj
+    '''
     global cn
     global pools
     global datamodels
@@ -98,10 +103,6 @@ def data_handel(request):
     if "add_pool" in request.form:
         try:
             pool_name = str(request.form.get("add_pool"))
-            print("request.values", request.values)
-            print("request.form", request.form)
-
-            print(pool_name)
             cn.c.create_pool(pool_name)
             pools = [pool.name for pool in cn.get_pools()]
             return render_template(
@@ -153,9 +154,11 @@ def data_handel(request):
             if table:
                 tablename = secure_filename(table.filename)
                 file_path = os.path.join(app.config["UPLOAD_FOLDER"], tablename)
+
                 # set the file path
                 table.save(file_path)
                 log_path = join(dirname(realpath(__file__)), file_path)
+
                 log = xes_importer.apply(log_path)
                 df_act = convert_to_dataframe(log)
                 df_act.rename(columns={"case:concept:name": "CASE ID"}, inplace=True)
@@ -245,7 +248,7 @@ def discover():
             datamodel = cn.c.datamodels.find(datamodel_name)
             threshold = float(request.form["threshold"])
             model = declare_model_discover(datamodel, table, (1 - threshold))
-            print(model)
+            print('111')
             text_model = {}
             text_model["EquivalenceM"] = [
                 (

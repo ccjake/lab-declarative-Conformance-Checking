@@ -31,8 +31,10 @@ class Celonis_Connect:
         self.c = get_celonis(
             url=celonis_url, api_token=api_token, key_type="USER_KEY", permissions=False
         )
-        self.datamodel = self.c.datamodels.find("0c6b4617-c643-42b5-8377-e99c974e65bb")
-        self.table = self.datamodel.tables.find("example_log_xes")
+        self.datamodel = None
+        self.table = None
+        # self.datamodel = self.c.datamodels.find("0c6b4617-c643-42b5-8377-e99c974e65bb")
+        # self.table = self.datamodel.tables.find("example_log_xes")
         # self.pool = self.datamodel.
     def get_pools(self):
         """
